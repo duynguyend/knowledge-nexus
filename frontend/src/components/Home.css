@@ -1,0 +1,101 @@
+.home-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem;
+  margin-top: 2rem;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.home-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.home-header h1 {
+  font-size: 2.2rem;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.home-subtitle {
+  font-size: 1.1rem;
+  color: #666;
+  max-width: 500px;
+}
+
+.research-input-section {
+  display: flex;
+  width: 100%;
+  margin-bottom: 1.5rem;
+}
+
+.research-topic-input {
+  flex-grow: 1;
+  padding: 0.8rem 1rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px 0 0 4px;
+  outline: none;
+}
+
+.research-topic-input:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.start-research-button {
+  padding: 0.8rem 1.5rem;
+  font-size: 1rem;
+  color: #fff;
+  background-color: #007bff;
+  border: 1px solid #007bff;
+  border-radius: 0 4px 4px 0;
+  cursor: pointer;
+  transition: background-color 0.15s ease-in-out;
+}
+
+.start-research-button:hover {
+  background-color: #0056b3;
+}
+
+.error-message {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+  padding: 0.75rem 1.25rem;
+  border-radius: 0.25rem;
+  margin-top: 1rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.research-status-display {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  background-color: #f9f9f9;
+  width: 100%;
+  text-align: left;
+}
+
+.research-status-display h3 {
+  margin-top: 0;
+  color: #333;
+}
+
+.research-status-display p {
+  margin: 0.5rem 0;
+  font-size: 0.95rem;
+  color: #555;
+}
+
+.research-status-display p strong {
+  color: #333;
+}

@@ -1,0 +1,139 @@
+.export-options-container {
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 2rem;
+  font-family: Arial, sans-serif;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.export-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.export-header h1 {
+  font-size: 2rem;
+  color: #333;
+}
+
+.export-header p {
+  font-size: 1rem;
+  color: #666;
+}
+
+.export-form .form-section {
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  background-color: #f9f9f9;
+}
+
+.export-form legend {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #007bff;
+  padding: 0 0.5rem;
+  margin-left: 1rem; /* Align with padding of fieldset */
+}
+
+.export-form .form-group {
+  margin-bottom: 1rem;
+}
+
+.export-form label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #555;
+  font-weight: normal; /* Less emphasis than legend */
+}
+
+.export-form select,
+.export-form input[type="text"] /* If you add any text inputs */ {
+  width: 100%;
+  padding: 0.6rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 0.95rem;
+  box-sizing: border-box; /* Important for width 100% */
+}
+
+.export-form .checkbox-group label {
+  display: block; /* Each checkbox on its own line for clarity */
+  margin-bottom: 0.5rem;
+  font-weight: normal;
+}
+.export-form .checkbox-group input[type="checkbox"] {
+  margin-right: 0.5rem;
+  vertical-align: middle;
+}
+
+.export-form .sections-checkboxes {
+  max-height: 150px; /* Example height */
+  overflow-y: auto;
+  border: 1px solid #eee;
+  padding: 0.5rem;
+  background-color: #fff;
+}
+
+
+.generate-doc-button {
+  display: block;
+  width: 100%;
+  padding: 0.8rem 1.5rem;
+  font-size: 1.1rem;
+  color: #fff;
+  background-color: #28a745; /* Green for generate */
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.15s ease-in-out;
+  margin-top: 1rem;
+}
+
+.generate-doc-button:hover {
+  background-color: #218838;
+}
+
+.generate-doc-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.export-error { /* Using error-message class from global or Home.css if defined */
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+  padding: 0.75rem 1.25rem;
+  border-radius: 0.25rem;
+  margin-top: 1.5rem;
+}
+
+.generation-result {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  border: 1px solid #c3e6cb; /* Green border for success */
+  border-radius: 4px;
+  background-color: #d4edda; /* Light green background */
+  color: #155724;
+}
+
+.generation-result h4 {
+  margin-top: 0;
+}
+
+.download-link {
+  display: inline-block;
+  margin-top: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: #007bff;
+  color: white;
+  text-decoration: none;
+  border-radius: 4px;
+}
+
+.download-link:hover {
+  background-color: #0056b3;
+}
