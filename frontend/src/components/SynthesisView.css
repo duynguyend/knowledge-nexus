@@ -1,0 +1,128 @@
+.synthesis-view-container {
+  padding: 2rem;
+  font-family: Arial, sans-serif;
+}
+
+.synthesis-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.synthesis-header h1 {
+  font-size: 2rem;
+  color: #333;
+}
+
+.synthesis-header p {
+  font-size: 1rem;
+  color: #666;
+}
+
+.synthesis-section {
+  background-color: #fff;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.synthesis-section h2 {
+  font-size: 1.5rem;
+  color: #007bff;
+  margin-top: 0;
+  margin-bottom: 1rem;
+  border-bottom: 2px solid #eee;
+  padding-bottom: 0.5rem;
+}
+
+.progress-card {
+  background-color: #f8f9fa;
+  padding: 1rem;
+  border-radius: 6px;
+  margin-bottom: 1.5rem;
+}
+
+.progress-card h3 {
+  margin-top: 0;
+  font-size: 1.2rem;
+  color: #343a40;
+}
+
+.progress-bar-container-synthesis {
+  width: 100%;
+  background-color: #e9ecef;
+  border-radius: .25rem;
+  margin-top: 0.5rem;
+}
+
+.progress-bar-synthesis {
+  height: 20px;
+  background-color: #28a745; /* Green for synthesis progress */
+  color: white;
+  text-align: center;
+  line-height: 20px;
+  border-radius: .25rem;
+  transition: width 0.3s ease-in-out;
+  font-size: 0.8rem;
+}
+
+.knowledge-graph-placeholder {
+  text-align: center;
+  padding: 2rem;
+  border: 2px dashed #007bff;
+  border-radius: 6px;
+  color: #007bff;
+  background-color: #f0f8ff; /* Light blue background */
+}
+
+.knowledge-graph-placeholder h4 {
+  margin-top: 0;
+}
+
+.graph-mockup {
+  font-family: monospace;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin-top: 1rem;
+  color: #495057;
+}
+
+
+.conflicts-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.conflicts-table th, .conflicts-table td {
+  border: 1px solid #ddd;
+  padding: 0.75rem;
+  text-align: left;
+}
+
+.conflicts-table th {
+  background-color: #f8f9fa;
+  font-weight: bold;
+}
+
+.conflicts-table tbody tr:hover {
+  background-color: #f1f1f1;
+}
+
+.status-pending-review { color: #ffc107; font-weight: bold; }
+.status-resolved-chose-source-c { color: #28a745; } /* Example specific status */
+
+.resolve-button {
+  padding: 0.4rem 0.8rem;
+  font-size: 0.85rem;
+  color: #fff;
+  background-color: #ffc107; /* Yellow for resolve action */
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.15s ease-in-out;
+}
+
+.resolve-button:hover {
+  background-color: #e0a800;
+}

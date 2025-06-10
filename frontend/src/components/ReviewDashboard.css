@@ -1,0 +1,79 @@
+.review-dashboard-container {
+  padding: 2rem;
+  font-family: Arial, sans-serif;
+}
+
+.review-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.review-header h1 {
+  font-size: 2rem;
+  color: #333;
+}
+
+.review-header p {
+  font-size: 1rem;
+  color: #666;
+}
+
+.dashboard-section {
+  background-color: #fff;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.dashboard-section h2 {
+  font-size: 1.5rem;
+  color: #007bff;
+  margin-top: 0;
+  margin-bottom: 1rem;
+  border-bottom: 2px solid #eee;
+  padding-bottom: 0.5rem;
+}
+
+.projects-table, .queue-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.projects-table th, .projects-table td,
+.queue-table th, .queue-table td {
+  border: 1px solid #ddd;
+  padding: 0.75rem;
+  text-align: left;
+}
+
+.projects-table th, .queue-table th {
+  background-color: #f8f9fa;
+  font-weight: bold;
+  color: #495057;
+}
+
+.projects-table tbody tr:hover,
+.queue-table tbody tr:hover {
+  background-color: #f1f1f1;
+}
+
+.priority-high { color: #dc3545; font-weight: bold; }
+.priority-medium { color: #ffc107; }
+.priority-low { color: #28a745; }
+
+.review-action-button {
+  padding: 0.4rem 0.8rem;
+  font-size: 0.85rem;
+  color: #fff;
+  background-color: #007bff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.15s ease-in-out;
+}
+
+.review-action-button:hover {
+  background-color: #0056b3;
+}
