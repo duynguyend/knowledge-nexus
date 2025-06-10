@@ -9,3 +9,13 @@ sse-starlette
 tavily-python
 langchain-community
 langchain-openai
+pytest
+httpx
+fastapi
+uvicorn
+python-dotenv
+langchain_core
+langgraph
+langchain_community
+langchain_openai
+chromadb
