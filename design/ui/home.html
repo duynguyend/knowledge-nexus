@@ -1,0 +1,89 @@
+<html><head>
+<meta charset="utf-8"/>
+<link crossorigin="" href="https://fonts.gstatic.com/" rel="preconnect"/>
+<link as="style" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter%3Awght%40400%3B500%3B700%3B900&amp;family=Noto+Sans%3Awght%40400%3B500%3B700%3B900" onload="this.rel='stylesheet'" rel="stylesheet"/>
+<title>Knowledge Nexus</title>
+<link href="data:image/x-icon;base64," rel="icon" type="image/x-icon"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings:
+      'FILL' 0,
+      'wght' 400,
+      'GRAD' 0,
+      'opsz' 24
+    }
+  </style>
+</head>
+<body class="bg-slate-50" style='font-family: Inter, "Noto Sans", sans-serif;'>
+<div class="relative flex size-full min-h-screen flex-col group/design-root overflow-x-hidden">
+<div class="layout-container flex h-full grow flex-col">
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-slate-200 px-10 py-4 bg-white">
+<div class="flex items-center gap-3 text-slate-900">
+<svg class="size-7 text-blue-600" fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path clip-rule="evenodd" d="M24 18.4228L42 11.475V34.3663C42 34.7796 41.7457 35.1504 41.3601 35.2992L24 42V18.4228Z" fill="currentColor" fill-rule="evenodd"></path>
+<path clip-rule="evenodd" d="M24 8.18819L33.4123 11.574L24 15.2071L14.5877 11.574L24 8.18819ZM9 15.8487L21 20.4805V37.6263L9 32.9945V15.8487ZM27 37.6263V20.4805L39 15.8487V32.9945L27 37.6263ZM25.354 2.29885C24.4788 1.98402 23.5212 1.98402 22.646 2.29885L4.98454 8.65208C3.7939 9.08038 3 10.2097 3 11.475V34.3663C3 36.0196 4.01719 37.5026 5.55962 38.098L22.9197 44.7987C23.6149 45.0671 24.3851 45.0671 25.0803 44.7987L42.4404 38.098C43.9828 37.5026 45 36.0196 45 34.3663V11.475C45 10.2097 44.2061 9.08038 43.0155 8.65208L25.354 2.29885Z" fill="currentColor" fill-rule="evenodd"></path>
+</svg>
+<h2 class="text-slate-900 text-xl font-bold leading-tight tracking-[-0.015em]">Knowledge Nexus</h2>
+</div>
+<div class="flex flex-1 justify-end items-center gap-6">
+<nav class="flex items-center gap-6">
+<a class="text-slate-700 hover:text-blue-600 text-sm font-medium leading-normal transition-colors" href="#">Home</a>
+<a class="text-slate-700 hover:text-blue-600 text-sm font-medium leading-normal transition-colors" href="#">My Library</a>
+<a class="text-slate-700 hover:text-blue-600 text-sm font-medium leading-normal transition-colors" href="#">Explore</a>
+<a class="text-slate-700 hover:text-blue-600 text-sm font-medium leading-normal transition-colors" href="#">Community</a>
+</nav>
+<button class="flex items-center justify-center rounded-full h-10 w-10 hover:bg-slate-100 text-slate-600 transition-colors">
+<span class="material-symbols-outlined text-2xl">notifications</span>
+</button>
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 border border-slate-200 shadow-sm" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuB-HVDEzkObyXib5cSjrUZf62SxPe626h4qDiipYrVw0zGdRcsunrav7VsuccMP4MEnA7KxcAe8zmoq3AGTJurMF71gdEnfufi5aqn70XJSg1bwuaeUOU0JxnSBYG1Qhf5NUI8yzArfai2hZq1TQFVf3XrQjH6tKXo5onq_r6tUbbVjRDqt_R8BYgAiiAdxZViHR2gAYiG5LwPCRya4it_cGQ_6hfuSOEPfk1M3snzKxXWaJUvwrPufeuBdJlvoQ3NDCTliMhM-X1w");'></div>
+</div>
+</header>
+<main class="flex-1 px-40 py-12 flex justify-center">
+<div class="layout-content-container flex flex-col max-w-2xl w-full items-center">
+<div class="w-full bg-white p-8 rounded-xl shadow-lg border border-slate-200">
+<div class="text-center mb-8">
+<h1 class="text-slate-900 text-4xl font-bold leading-tight tracking-tight mb-2">Uncover the Truth with Multi-Agent AI</h1>
+<p class="text-slate-600 text-lg">Enter your research topic or question to begin your journey of discovery.</p>
+</div>
+<div class="relative mb-8">
+<div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-slate-500">search</span>
+</div>
+<input class="form-input w-full pl-12 pr-4 py-3.5 text-base rounded-lg border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 placeholder-slate-400 transition-shadow" placeholder="E.g., The impact of AI on climate change" type="text"/>
+</div>
+<div class="mb-6">
+<h2 class="text-slate-800 text-xl font-semibold leading-tight tracking-tight mb-4">Or explore some popular topics:</h2>
+<div class="flex flex-wrap gap-3">
+<button class="flex items-center justify-center gap-x-2 rounded-full bg-slate-100 hover:bg-blue-100 text-slate-700 hover:text-blue-700 px-4 py-2 text-sm font-medium transition-colors">
+<span>The impact of social media on mental health</span>
+</button>
+<button class="flex items-center justify-center gap-x-2 rounded-full bg-slate-100 hover:bg-blue-100 text-slate-700 hover:text-blue-700 px-4 py-2 text-sm font-medium transition-colors">
+<span>The future of renewable energy</span>
+</button>
+<button class="flex items-center justify-center gap-x-2 rounded-full bg-slate-100 hover:bg-blue-100 text-slate-700 hover:text-blue-700 px-4 py-2 text-sm font-medium transition-colors">
+<span>The history of artificial intelligence</span>
+</button>
+<button class="flex items-center justify-center gap-x-2 rounded-full bg-slate-100 hover:bg-blue-100 text-slate-700 hover:text-blue-700 px-4 py-2 text-sm font-medium transition-colors">
+<span>The ethics of genetic engineering</span>
+</button>
+<button class="flex items-center justify-center gap-x-2 rounded-full bg-slate-100 hover:bg-blue-100 text-slate-700 hover:text-blue-700 px-4 py-2 text-sm font-medium transition-colors">
+<span>The science of climate change</span>
+</button>
+</div>
+</div>
+<button class="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors text-base">
+<span class="material-symbols-outlined">auto_awesome</span>
+              Start Researching
+            </button>
+</div>
+</div>
+</main>
+<footer class="py-8 px-10 text-center border-t border-slate-200 bg-white">
+<p class="text-sm text-slate-500">© 2024 Knowledge Nexus. All rights reserved.</p>
+</footer>
+</div>
+</div>
+
+</body></html>
