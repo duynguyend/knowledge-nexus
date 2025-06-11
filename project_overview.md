@@ -12,3 +12,6 @@
 - **Tailored Document Generation:** Generates customized documents based on the synthesized knowledge in various formats.
 
 **Problem Solved:** In an age of information overload and rampant misinformation, Knowledge Nexus addresses a critical need for reliable and trustworthy knowledge. By combining the speed and efficiency of AI with the critical judgment of human oversight, it offers an unparalleled solution for accessing verified information.
+
+**Important Note on Project Structure:**
+An older directory named `knowledge_nexus/` exists at the root of the repository. This directory contains outdated or redundant code and should be ignored for active development. The primary codebase resides in the top-level `backend/` and `frontend/` directories. Attempts to remove or rename this legacy `knowledge_nexus/` directory were unsuccessful due to tooling limitations during a recent refactoring.

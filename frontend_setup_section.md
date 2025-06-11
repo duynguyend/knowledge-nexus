@@ -12,9 +12,8 @@ This section outlines the steps to set up and run the frontend React application
 1.  **Navigate to the Frontend Directory:**
     Open your terminal and change to the frontend directory:
     ```bash
-    cd knowledge_nexus/frontend
+    cd frontend
     ```
-    *(Adjust `knowledge_nexus/` if your project is cloned under a different root name).*
 
 2.  **Install Dependencies:**
     Install all required Node.js packages listed in `package.json`:
