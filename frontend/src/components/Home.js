@@ -43,18 +43,20 @@ function Home() {
         </p>
       </header>
 
-      <div className="research-input-section">
-        <input
-          type="text"
-          value={topic}
-          onChange={handleTopicChange}
-          placeholder="E.g., The impact of AI on climate change"
-          className="research-topic-input"
-        />
-        <button onClick={handleStartResearch} className="start-research-button">
-          Start Researching
-        </button>
-      </div>
+      {!(researchStatus && researchStatus.task_id) && (
+        <div className="research-input-section">
+          <input
+            type="text"
+            value={topic}
+            onChange={handleTopicChange}
+            placeholder="E.g., The impact of AI on climate change"
+            className="research-topic-input"
+          />
+          <button onClick={handleStartResearch} className="start-research-button">
+            Start Researching
+          </button>
+        </div>
+      )}
 
       {error && (
         <div className="error-message">
