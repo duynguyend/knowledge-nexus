@@ -7,7 +7,7 @@ from langchain_core.messages import BaseMessage
 from langchain_core.language_models.chat_models import BaseChatModel # Added for type hinting
 from langgraph.graph import StateGraph, END
 from langchain_community.tools import TavilySearchResults
-from langchain_openai import ChatOpenAI # Added for LLM
+from langchain_openai import ChatOpenAI, AzureChatOpenAI # Added for LLM
 
 # Attempt to import from sibling directories for services and models
 try:
@@ -33,6 +33,13 @@ if not TAVILY_API_KEY:
     print("Warning: TAVILY_API_KEY not found in environment variables. Research node will fail if Tavily is used.")
     # You could raise an error here or allow the app to run with research functionality disabled.
     # raise ValueError("TAVILY_API_KEY not found. Please set it in your .env file or environment.")
+
+# Load OpenAI and Azure OpenAI environment variables
+AZURE_OPENAI_API_KEY = os.getenv("AZURE_OPENAI_API_KEY")
+AZURE_OPENAI_ENDPOINT = os.getenv("AZURE_OPENAI_ENDPOINT")
+OPENAI_API_VERSION = os.getenv("OPENAI_API_VERSION") # This is often a fixed string like "2023-07-01-preview"
+AZURE_OPENAI_DEPLOYMENT_NAME = os.getenv("AZURE_OPENAI_DEPLOYMENT_NAME") # Name of your deployment in Azure AI Studio
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY") # Keep this for fallback or other uses if necessary
 
 
 # 1. Define KnowledgeNexusState
@@ -449,14 +456,34 @@ def build_knowledge_nexus_workflow(chroma_service: Optional[ChromaService] = Non
 
     # Initialize LLM instance
     llm_instance: Optional[BaseChatModel] = None
-    if OPENAI_API_KEY and OPENAI_API_KEY != "YOUR_ACTUAL_OPENAI_API_KEY_REPLACE_ME":
+    if AZURE_OPENAI_API_KEY and AZURE_OPENAI_ENDPOINT and OPENAI_API_VERSION and AZURE_OPENAI_DEPLOYMENT_NAME:
         try:
-            llm_instance = ChatOpenAI(api_key=OPENAI_API_KEY, model_name="gpt-3.5-turbo", temperature=0.2)
-            print("ChatOpenAI LLM initialized successfully.")
+            llm_instance = AzureChatOpenAI(
+                azure_endpoint=AZURE_OPENAI_ENDPOINT,
+                api_key=AZURE_OPENAI_API_KEY,
+                api_version=OPENAI_API_VERSION,
+                azure_deployment=AZURE_OPENAI_DEPLOYMENT_NAME,
+                temperature=0.2,
+                # model_name="gpt-3.5-turbo" # model_name is often not needed if azure_deployment is specified
+            )
+            print("AzureChatOpenAI LLM initialized successfully.")
         except Exception as e:
-            print(f"Error initializing ChatOpenAI: {e}. LLM will be None.")
+            print(f"Error initializing AzureChatOpenAI: {e}. LLM will be None.")
+            llm_instance = None # Ensure it's None on failure
     else:
-        print("WARNING: OPENAI_API_KEY not found or is a placeholder. LLM dependent nodes will use simulated/placeholder logic.")
+        print("WARNING: Azure OpenAI environment variables (AZURE_OPENAI_API_KEY, AZURE_OPENAI_ENDPOINT, OPENAI_API_VERSION, AZURE_OPENAI_DEPLOYMENT_NAME) not fully set. Azure LLM not initialized.")
+        # Optional: Fallback to ChatOpenAI if desired, or just leave llm_instance as None
+        # For now, let's not fallback to maintain clarity on which LLM is active.
+        # If you want a fallback:
+        # print("Attempting to fall back to standard OpenAI...")
+        # if OPENAI_API_KEY and OPENAI_API_KEY != "YOUR_ACTUAL_OPENAI_API_KEY_REPLACE_ME":
+        #     try:
+        #         llm_instance = ChatOpenAI(api_key=OPENAI_API_KEY, model_name="gpt-3.5-turbo", temperature=0.2)
+        #         print("ChatOpenAI LLM initialized successfully as a fallback.")
+        #     except Exception as e_std:
+        #         print(f"Error initializing standard ChatOpenAI as fallback: {e_std}. LLM will be None.")
+        # else:
+        #     print("Standard OPENAI_API_KEY not found or is a placeholder. No LLM will be initialized.")
 
     synthesize_node_with_llm = functools.partial(synthesize_node, llm=llm_instance)
     document_generation_node_with_llm = functools.partial(document_generation_node, llm=llm_instance)
