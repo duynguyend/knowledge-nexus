@@ -149,7 +149,7 @@ async def run_research_workflow_async(task_id: str, topic: str, initial_graph_in
         if final_event_state:
              active_tasks[task_id].update({
                 "status": "completed", # This is the overall status
-                "current_stage": "completed", # Explicitly set current_stage in the update
+                "current_stage": "completed", # Explicitly set current_stage
                 # Use final_event_state which is the state after the last node that led to END
                 "final_document_preview": final_event_state.get('final_document', '')[:250] + "...",
                 "final_graph_state": final_event_state
