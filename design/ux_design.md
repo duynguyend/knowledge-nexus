@@ -32,8 +32,8 @@ The primary user flow involves initiating a research task, monitoring its progre
 
 ### 3.2. Review & Refine Synthesis
 
-1.  **Synthesis Screen (`synthesis.html`)**: Presents the initial synthesized knowledge. Users can read, highlight, and potentially add notes or request further synthesis/refinement.
-2.  **Review Dashboard (`review.html`)**: Allows users to review the synthesized content, identify potential conflicts or inaccuracies, and provide feedback or corrections. This is where human oversight is integrated.
+1.  **Review Dashboard (`review.html`)**: Allows users to review the synthesized content, identify potential conflicts or inaccuracies, and provide feedback or corrections. This is where human oversight is integrated.
+2.  **Synthesis Screen (`synthesis.html`)**: Presents the initial synthesized knowledge. Users can read, highlight, and potentially add notes or request further synthesis/refinement.
 
 ### 3.3. Select Output & Export
 
