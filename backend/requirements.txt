@@ -1,5 +1,5 @@
 chromadb
-sentence-transformers
+openai
 langchain
 langgraph
 fastapi
