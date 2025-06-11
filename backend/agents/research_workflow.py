@@ -6,7 +6,8 @@ from typing import TypedDict, List, Dict, Optional, Any
 from langchain_core.messages import BaseMessage
 from langchain_core.language_models.chat_models import BaseChatModel # Added for type hinting
 from langgraph.graph import StateGraph, END
-from langchain_community.tools import TavilySearchResults
+# from langchain_community.tools import TavilySearchResults # Tavily is being replaced
+from googleapiclient.discovery import build # Added for Google Search
 from langchain_openai import ChatOpenAI, AzureChatOpenAI # Added for LLM
 
 # Attempt to import from sibling directories for services and models
@@ -24,15 +25,26 @@ except ImportError:
 
 # Load environment variables from .env file
 # This should ideally be called once when the application starts,
-# but for modularity, calling it here ensures TAVILY_API_KEY is loaded for this module.
-# Ensure backend/.env file exists with TAVILY_API_KEY="YOUR_KEY"
+# but for modularity, calling it here ensures API keys are loaded for this module.
+# Ensure backend/.env file exists with your API keys
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '..', '.env')) # Assuming .env is in backend directory
 
+# Tavily API Key (can be removed if Tavily is fully deprecated)
 TAVILY_API_KEY = os.getenv("TAVILY_API_KEY")
-if not TAVILY_API_KEY:
-    print("Warning: TAVILY_API_KEY not found in environment variables. Research node will fail if Tavily is used.")
-    # You could raise an error here or allow the app to run with research functionality disabled.
-    # raise ValueError("TAVILY_API_KEY not found. Please set it in your .env file or environment.")
+# if not TAVILY_API_KEY:
+#     print("Warning: TAVILY_API_KEY not found in environment variables. Research node will fail if Tavily is used.")
+
+# Google Custom Search API Credentials
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+GOOGLE_CSE_ID = os.getenv("GOOGLE_CSE_ID")
+
+if not GOOGLE_API_KEY:
+    print("Warning: GOOGLE_API_KEY not found in environment variables. Google Search will not be available.")
+if not GOOGLE_CSE_ID:
+    print("Warning: GOOGLE_CSE_ID not found in environment variables. Google Search will not be available.")
+# else:
+    # print("Google Custom Search API Key and CSE ID are loaded.") # Optional: for debugging
+
 
 # Load OpenAI and Azure OpenAI environment variables
 AZURE_OPENAI_API_KEY = os.getenv("AZURE_OPENAI_API_KEY")
@@ -71,113 +83,60 @@ def research_node(state: KnowledgeNexusState, chroma_service: ChromaService) -> 
         state['research_data'] = []
         return state
 
-    print(f"Initiating internet research for topic: {topic} (Task ID: {task_id})")
+    print(f"Initiating internet research for topic: {topic} (Task ID: {task_id}) using Google Search")
     state['error_message'] = None # Clear previous errors
+    processed_results = [] # Initialize processed_results
 
-    if not TAVILY_API_KEY or TAVILY_API_KEY == "YOUR_ACTUAL_TAVILY_API_KEY_REPLACE_ME":
-        print("Warning: TAVILY_API_KEY is not set or is a placeholder. Skipping actual internet search.")
-        print("Please set your TAVILY_API_KEY in the backend/.env file.")
+    # Check for Google API Key and CSE ID
+    if not GOOGLE_API_KEY or GOOGLE_API_KEY == "YOUR_GOOGLE_API_KEY" or \
+       not GOOGLE_CSE_ID or GOOGLE_CSE_ID == "YOUR_GOOGLE_CSE_ID":
+        print("Warning: GOOGLE_API_KEY or GOOGLE_CSE_ID is not set or is a placeholder.")
+        print("Please set your GOOGLE_API_KEY and GOOGLE_CSE_ID in the backend/.env file.")
+        print("Using simulated Google Search data.")
         simulated_data = [
-            {"id": f"sim_{uuid.uuid4()}", "url": "http://example.com/simulated_source1", "title": f"Simulated: Overview of {topic}", "content": f"This is simulated content about {topic} because Tavily API key is missing.", "score": 0.85, "source_name": "Simulator", "snippet": f"Simulated snippet for {topic} 1."},
-            {"id": f"sim_{uuid.uuid4()}", "url": "http://example.com/simulated_source2", "title": f"Simulated: Details on {topic}", "content": f"Further simulated details regarding {topic} for demonstration purposes.", "score": 0.80, "source_name": "Simulator", "snippet": f"Simulated snippet for {topic} 2."}
+            {"id": f"sim_gs_{uuid.uuid4()}", "url": f"http://example.com/simulated_gs_source1_for_{topic.replace(' ','_')}", "title": f"Simulated Google: Overview of {topic}", "snippet": f"This is simulated Google Search content about {topic} because API keys are missing.", "raw_content": f"Simulated raw content for {topic} from Google Search.", "score": 0.8, "source_name": "Google Search Simulator"},
+            {"id": f"sim_gs_{uuid.uuid4()}", "url": f"http://example.com/simulated_gs_source2_for_{topic.replace(' ','_')}", "title": f"Simulated Google: Details on {topic}", "snippet": f"Further simulated Google Search details regarding {topic}.", "raw_content": f"Further simulated raw content for {topic} from Google Search.", "score": 0.75, "source_name": "Google Search Simulator"}
         ]
+        processed_results.extend(simulated_data)
         # Ensure 'research_data' is initialized if it's None
         if state.get('research_data') is None:
             state['research_data'] = []
-        state['research_data'].extend(simulated_data)
-        print(f"Research (simulated) completed. Found {len(simulated_data)} pieces of information.")
-        # Add simulated data to ChromaDB as well, if chroma_service is available
-        if chroma_service:
-            documents = [item['snippet'] for item in simulated_data if item.get('snippet')]
-            metadatas = [
-                {"source_url": item.get('url', ''), "title": item.get('title', ''), "research_topic": topic, "original_id_from_source": item.get('id')}
-                for item in simulated_data if item.get('snippet')
-            ]
-            ids = [item['id'] for item in simulated_data if item.get('snippet')]
-            if documents and metadatas and ids:
-                try:
-                    chroma_service.add_documents(collection_name=task_id, documents=documents, metadatas=metadatas, ids=ids)
-                    print(f"Researcher: Added {len(documents)} SIMULATED documents to ChromaDB for task '{task_id}'.")
-                except Exception as chroma_e:
-                    print(f"Error interacting with ChromaDB for simulated data: {chroma_e}")
-                    state['error_message'] = f"Failed to store simulated research data in ChromaDB: {str(chroma_e)}"
-        state['human_in_loop_needed'] = False
-        return state
+        # state['research_data'].extend(processed_results) # This will be done after the try-except block
+        # print(f"Research (simulated Google) completed. Found {len(processed_results)} pieces of information.")
+        # No return here, fall through to add to Chroma if chroma_service is available and then return state
+    else:
+        try:
+            print(f"Attempting Google Custom Search for query: '{topic}'")
+            service = build("customsearch", "v1", developerKey=GOOGLE_API_KEY)
+            result = service.cse().list(q=topic, cx=GOOGLE_CSE_ID, num=5).execute()
 
-    try:
-        # Using TavilySearchResults LangChain tool wrapper
-        # You can customize max_results, include_domains, exclude_domains etc.
-        # tavily_search = TavilySearchResults(api_key=TAVILY_API_KEY, max_results=5, search_depth="advanced")
-        # results = tavily_search.invoke(topic) # Input is just the topic string for this wrapper
+            google_search_items = result.get("items", [])
+            print(f"Google Search returned {len(google_search_items)} items.")
 
-        # Using Tavily Python client directly for more control (as per Tavily docs)
-        # from tavily import TavilyClient
-        # tavily_client = TavilyClient(api_key=TAVILY_API_KEY)
-        # results = tavily_client.search(query=topic, search_depth="advanced", max_results=7)
-        # raw_search_results = results.get("results", [])
-
-
-        # Using TavilySearchResults Tool (consistent with LangChain ecosystem)
-        # The tool's invoke method expects a dictionary with a "query" key.
-        tool = TavilySearchResults(max_results=5, api_key=TAVILY_API_KEY)
-        print(f"Invoking Tavily search for query: '{topic}'")
-        # The direct output of tool.invoke is a list of strings by default (concatenated snippets).
-        # To get structured results (list of dicts), you might need to use it within an agent
-        # or access a different method/property if available, or parse the string output.
-        # Let's assume the standard LangChain tool behavior where it might return string snippets.
-        # For more structured output, TavilyClient.search is often better.
-        # However, the prompt implies using the LangChain wrapper.
-        # The TavilySearchResults.invoke method, when called directly with a string,
-        # returns a string of concatenated results.
-        # If it's used as part of a LangChain agent or sequence, the output format might differ.
-        # Let's try to get structured output if possible or adapt.
-        # A common pattern for tools is tool.run(query) or tool._run(query) for direct execution.
-
-        # The Tavily documentation suggests `client.search(query=...)` for structured results.
-        # Let's use the `TavilySearchResults` but aim for its underlying client logic if simple invoke isn't structured.
-        # `TavilySearchResults` has a `_results_converter` which implies it can get structured data.
-        # The default behavior of `invoke` on `TavilySearchResults` might be a string.
-        # Let's use a method that's more likely to give us list of dicts.
-        # The `_raw_search` method on the Tavily client (which TavilySearchResults wraps) is what we want.
-        # TavilySearchResults(api_key=...)._raw_search(query=topic) is not public API.
-
-        # Let's try with the assumption that results = tool.invoke({"query": topic}) gives structured data
-        # or that we adapt. The Tavily documentation for LangChain tools suggests it can return structured data.
-        # Okay, the `TavilySearchResults` tool, when its `search_kwargs` (like `search_depth`) are set,
-        # and when called via an agent or directly, should provide a list of document-like objects or dicts.
-        # If `tool.invoke(topic)` returns a string, we'll need to adjust.
-        # A quick check of TavilySearchResults source: it returns a list of dicts if used correctly.
-        # The input to invoke should be a dict: `{"query": "your query"}`
-
-        raw_results = tool.invoke({"query": topic}) # This should return List[Dict]
-
-        processed_results = []
-        if isinstance(raw_results, list): # Expecting a list of dictionaries
-            for res in raw_results:
-                # Adapt this based on actual keys in `res` from TavilySearchResults
-                # Common keys: 'url', 'content', 'title', 'score', 'raw_content'
+            for item in google_search_items:
                 item_id = str(uuid.uuid4())
                 processed_results.append({
                     "id": item_id,
-                    "url": res.get("url"),
-                    "title": res.get("title", topic), # Use topic as fallback title
-                    "snippet": res.get("content"), # 'content' usually holds the snippet
-                    "raw_content": res.get("raw_content", res.get("content")), # Store more if available
-                    "score": res.get("score", 0.0), # Relevance score if provided
-                    "source_name": "Tavily Search"
+                    "url": item.get("link"),
+                    "title": item.get("title"),
+                    "snippet": item.get("snippet"),
+                    "raw_content": item.get("snippet"), # Using snippet as raw_content
+                    "score": 0.8, # Placeholder score as Google Search API doesn't provide a direct one
+                    "source_name": "Google Search"
                 })
-        elif isinstance(raw_results, str): # Fallback if it returns a single string
-             print("Warning: Tavily search returned a single string, expected structured data. Processing as single item.")
-             processed_results.append({
-                 "id": str(uuid.uuid4()),
-                 "url": None, "title": topic, "snippet": raw_results,
-                 "raw_content": raw_results, "score": 0.0, "source_name": "Tavily Search (string output)"
-             })
+            # print(f"Processed {len(processed_results)} items from Google Search.")
 
-        state['research_data'] = (state.get('research_data') or []) + processed_results
-        print(f"Researcher: Found {len(processed_results)} results for topic '{topic}'.")
+        except Exception as e:
+            print(f"Error during Google Custom Search for topic '{topic}': {e}")
+            state['error_message'] = f"Failed to conduct research using Google Search: {str(e)}"
+            # If API call fails, we might still have simulated data if keys were initially missing, or empty processed_results
+            # state['research_data'] will be updated outside this try-catch based on processed_results
 
-        # Store results in ChromaDB
+    # Update state with results (either simulated or real or empty if error)
+    state['research_data'] = (state.get('research_data') or []) + processed_results
+    print(f"Researcher: Total research data now contains {len(state['research_data'])} items after Google Search attempt.")
+
+    # Store results (simulated or real) in ChromaDB
         if processed_results and chroma_service:
             documents = [item['snippet'] for item in processed_results if item.get('snippet')]
             metadatas = [
@@ -193,7 +152,7 @@ def research_node(state: KnowledgeNexusState, chroma_service: ChromaService) -> 
 
             if documents and metadatas and ids:
                 collection_name = task_id
-                print(f"Attempting to add {len(documents)} documents to ChromaDB collection: {collection_name}")
+                print(f"Attempting to add {len(documents)} documents from current search to ChromaDB collection: {collection_name}")
                 try:
                     added_successfully = chroma_service.add_documents(
                         collection_name=collection_name,
@@ -207,16 +166,17 @@ def research_node(state: KnowledgeNexusState, chroma_service: ChromaService) -> 
                         print(f"Researcher: Failed to add documents to ChromaDB for task '{task_id}'.")
                 except Exception as chroma_e:
                     print(f"Error interacting with ChromaDB: {chroma_e}")
-                    state['error_message'] = f"Failed to store research data in ChromaDB: {str(chroma_e)}"
+                    current_error = state.get('error_message', "")
+                    state['error_message'] = f"{current_error} Failed to store research data in ChromaDB: {str(chroma_e)}".strip()
             else:
-                print("No valid documents, metadatas, or IDs to add to ChromaDB.")
+                print("No valid documents, metadatas, or IDs from current search to add to ChromaDB.")
         elif not chroma_service:
-             print("Warning: ChromaService not available. Skipping document storage.")
+             print("Warning: ChromaService not available. Skipping document storage for current search.")
+        # Removed the broad try-except that was specific to Tavily
+    # else: # This was part of the removed Tavily key check block
+        # print("This part should not be reached if Google search logic is complete")
+        pass
 
-    except Exception as e:
-        print(f"Error during Tavily search for topic '{topic}': {e}")
-        state['error_message'] = f"Failed to conduct research using Tavily: {str(e)}"
-        state['research_data'] = state.get('research_data', [])
 
     state['human_in_loop_needed'] = False
     return state
@@ -595,4 +555,4 @@ if __name__ == '__main__':
 
 
     print("\nTest run finished.")
-    print("REMINDER: Ensure TAVILY_API_KEY is correctly set in backend/.env for actual internet searches.")
+    print("REMINDER: Ensure GOOGLE_API_KEY and GOOGLE_CSE_ID are correctly set in backend/.env for actual internet searches.")
