@@ -103,6 +103,8 @@ async def run_research_workflow_async(task_id: str, topic: str, initial_graph_in
     try:
         config = {"configurable": {"thread_id": task_id}}
         final_event_state = None # Keep track of the very last state from the stream
+        # --- Logging addition: Before astream loop ---
+        print(f"Task {task_id}: Starting/Resuming workflow. Initial/Current input state for graph: {{'current_stage': {current_input_state.get('current_stage')}, 'human_in_loop_needed': {current_input_state.get('human_in_loop_needed')}, 'current_verification_request_id': {current_input_state.get('current_verification_request', {}).get('data_id') if current_input_state.get('current_verification_request') else None}, 'human_feedback_approved': {current_input_state.get('human_feedback', {}).get('approved') if current_input_state.get('human_feedback') else None}}}")
 
         async for event in knowledge_nexus_graph.astream(current_input_state, config=config):
             if not event: continue
@@ -120,6 +122,9 @@ async def run_research_workflow_async(task_id: str, topic: str, initial_graph_in
                 active_tasks[task_id]['current_stage'] = current_stage_from_node
             # ---- MODIFICATION END ----
 
+            # --- Logging addition: Inside astream loop, after processing node ---
+            print(f"Task {task_id}: Node '{latest_node_name}' processed. State after node: {{'current_stage': {current_state_after_node.get('current_stage')}, 'human_in_loop_needed': {current_state_after_node.get('human_in_loop_needed')}, 'current_verification_request_id': {current_state_after_node.get('current_verification_request', {}).get('data_id') if current_state_after_node.get('current_verification_request') else None}, 'human_feedback_approved': {current_state_after_node.get('human_feedback', {}).get('approved') if current_state_after_node.get('human_feedback') else None}, 'error': {current_state_after_node.get('error_message')}}}")
+            # Original print statement follows, now enhanced by the one above.
             print(f"Task {task_id}: Processed node '{latest_node_name}'. Current stage: {current_stage_from_node}")
 
             if current_state_after_node.get('error_message'):
@@ -130,7 +135,8 @@ async def run_research_workflow_async(task_id: str, topic: str, initial_graph_in
             # Check if the workflow is pausing for human input
             if current_state_after_node.get('human_in_loop_needed') and \
                current_state_after_node.get('current_verification_request'):
-                print(f"Task {task_id}: Pausing for human input at node '{latest_node_name}'. Verification request for data ID: {current_state_after_node['current_verification_request']['data_id']}")
+                # --- Logging modification: Enhanced pausing print ---
+                print(f"Task {task_id}: Pausing for human input at node '{latest_node_name}'. Verification request for data ID: {current_state_after_node['current_verification_request']['data_id']}. Current stage: {current_state_after_node.get('current_stage')}")
                 active_tasks[task_id]['status'] = "awaiting_human_verification"
                 # Workflow effectively pauses here for this task_id.
                 # The current run_research_workflow_async will exit.
@@ -148,17 +154,20 @@ async def run_research_workflow_async(task_id: str, topic: str, initial_graph_in
                 "final_document_preview": final_event_state.get('final_document', '')[:250] + "...",
                 "final_graph_state": final_event_state
             })
-             print(f"Task {task_id}: Workflow completed successfully.")
+             # --- Logging modification: Enhanced completion print ---
+             print(f"Task {task_id}: Workflow completed successfully. Final stage: {final_event_state.get('current_stage')}")
         else:
             # This case might occur if the stream somehow ends without any event after resumption,
             # or if initial_graph_input was already a terminal state.
             if active_tasks[task_id]["status"] == "running": # If it was running and just finished without specific end state
                  active_tasks[task_id].update({"status": "unknown_completion", "current_stage": "unknown", "error_message": "Workflow stream ended without a definitive final state but was running."})
-                 print(f"Task {task_id}: Workflow stream ended without explicit completion or error, after being in 'running' state.")
+                 # --- Logging modification: Enhanced unknown completion print ---
+                 print(f"Task {task_id}: Workflow stream ended without explicit completion or error, after being in 'running' state. Last known stage: {active_tasks[task_id].get('current_stage')}")
 
 
     except Exception as e:
-        print(f"Task {task_id}: Critical error during workflow execution: {e}", exc_info=True)
+        # --- Logging modification: Enhanced critical error print ---
+        print(f"Task {task_id}: Critical error during workflow execution: {e}. Last known stage: {active_tasks[task_id].get('current_stage')}", exc_info=True)
         active_tasks[task_id].update({"status": "failed", "current_stage": "failed", "error_message": str(e)})
 
 # --- API Endpoints ---
