@@ -12,3 +12,5 @@ langchain-openai
 pytest
 httpx
 langchain_core
+google-api-python-client
+google-searchresults
