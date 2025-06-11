@@ -46,19 +46,21 @@ function ResearchProgress({ taskId }) {
     } catch (err) {
       console.error(`Error fetching status for task ${taskId}:`, err);
       // Only set general error if it's not a background poll or if statusDetails are missing
-      if (!statusDetails || isInitialFetch) {
-        setError(err.message || 'Failed to fetch task status.');
-      } else {
-        // For polling errors, maybe a more subtle notification or just log
-        console.warn("Polling error, keeping existing data:", err.message);
-      }
-      return false; // Stop polling on error for safety, can be made more resilient
+      // if (!statusDetails || isInitialFetch) { // MODIFIED: Error handling will be managed by the caller
+      //   setError(err.message || 'Failed to fetch task status.');
+      // } else {
+      //   // For polling errors, maybe a more subtle notification or just log
+      //   console.warn("Polling error, keeping existing data:", err.message);
+      // }
+      // return false; // Stop polling on error for safety, can be made more resilient
+      // MODIFICATION: Always re-throw the error. The caller will handle it.
+      throw err;
     } finally {
       if (isInitialFetch) setIsLoading(false);
       setIsPollingLoading(false);
     }
     return true; // Continue polling
-  }, [taskId, statusDetails]); // Added statusDetails to dependencies of fetchStatus
+  }, [taskId]); // REMOVED statusDetails from dependencies
 
   useEffect(() => {
     // --- Logging point 1: Start of useEffect ---
@@ -75,24 +77,38 @@ function ResearchProgress({ taskId }) {
       return; // Return early, no interval needed
     }
 
-    fetchStatus(true); // Initial fetch with main loading indicator
+    fetchStatus(true).catch(err => { // Initial fetch with main loading indicator
+      // Handle error from initial fetch
+      setError(err.message || 'Failed to fetch initial task status.');
+      console.error(`Task ${taskId}: Error on initial fetchStatus:`, err);
+    });
 
     const intervalId = setInterval(async () => {
       if (document.hidden) return; // Don't poll if tab is not visible
 
       // Check if polling should continue based on current statusDetails (again, inside interval)
+      // This check is crucial to stop polling once a terminal state is reached.
       if (statusDetails && (statusDetails.status === 'completed' || statusDetails.status === 'failed')) {
-        // This specific log might be redundant if the outer check already caught it, but good for safety.
-        console.log(`Task ${taskId}: Interval callback for ID ${intervalId}: Status became terminal (${statusDetails.status}). Clearing interval.`);
+        console.log(`Task ${taskId}: Interval callback for ID ${intervalId}: Status is terminal (${statusDetails.status}). Clearing interval.`);
         clearInterval(intervalId);
         return;
       }
 
-      const shouldContinuePolling = await fetchStatus(false); // Subsequent fetches are background polls
-      if (!shouldContinuePolling) {
-        // --- Logging point 4: fetchStatus returned false (completed/failed) ---
-        console.log(`Task ${taskId}: Interval callback for ID ${intervalId}: fetchStatus returned false (e.g. completed/failed). Clearing interval.`);
-        clearInterval(intervalId);
+      try {
+        const shouldContinuePolling = await fetchStatus(false); // Subsequent fetches are background polls
+        if (!shouldContinuePolling) {
+          // --- Logging point 4: fetchStatus returned false (completed/failed) ---
+          console.log(`Task ${taskId}: Interval callback for ID ${intervalId}: fetchStatus returned false (e.g. completed/failed). Clearing interval.`);
+          clearInterval(intervalId);
+        }
+      } catch (err) {
+        // Error during polling
+        console.warn(`Task ${taskId}: Error during polling fetchStatus for interval ID ${intervalId}:`, err.message);
+        // Optionally, decide if this error should stop polling or set a general error message
+        // For now, we'll let it continue polling unless it's a critical error that fetchStatus itself stops by returning false
+        // If fetchStatus throws, it implies a network or server issue, which might be temporary.
+        // We might want to set a subtle error indicator for polling failures.
+        // setError(err.message || 'Failed to update task status.'); // Example: set error on polling failure
       }
     }, DEFAULT_POLL_INTERVAL);
     // --- Logging point 3: After setInterval ---
@@ -162,11 +178,22 @@ function ResearchProgress({ taskId }) {
     <div className="research-progress-container">
       <h2>Research Progress</h2>
       <p><strong>Task ID:</strong> {statusDetails.task_id}</p>
-      <p><strong>Status:</strong> <span className={`status-${status}`}>{status || 'N/A'}</span> {isPollingLoading && status !== 'completed' && status !== 'failed' ? "(Updating...)" : ""}</p>
-      {message && <p><strong>Message:</strong> {message}</p>}
-      {typeof progress === 'number' && (
+      <p><strong>Status:</strong> <span className={`status-${status}`}>{status || 'N/A'}</span> {isPollingLoading && status !== 'completed' && status !== 'failed' && status !== 'awaiting_human_verification' ? "(Updating...)" : ""}</p>
+
+      {/* Message display: Show specific completion message if status is completed, otherwise regular message */}
+      {status === 'completed' && (
+        <div className="completion-message-block card">
+          <h3>Research Complete</h3>
+          <p>{message || "The research task has been successfully completed."}</p>
+          <button disabled className="placeholder-button">View Results (Not Implemented Yet)</button>
+        </div>
+      )}
+      {/* Show regular message only if not completed, to avoid redundancy with the block above */}
+      {status !== 'completed' && message && <p><strong>Message:</strong> {message}</p>}
+
+      {typeof progress === 'number' && status !== 'completed' && ( // Hide progress bar on completion
         <div className="progress-bar-container">
-          <div className_name="progress-bar" style={{ width: `${Math.max(0, Math.min(progress,1)) * 100}%` }}>
+          <div className="progress-bar" style={{ width: `${Math.max(0, Math.min(progress,1)) * 100}%` }}>
             {(Math.max(0, Math.min(progress,1)) * 100).toFixed(0)}%
           </div>
         </div>
@@ -174,6 +201,8 @@ function ResearchProgress({ taskId }) {
       {/* Display general error if it occurred during an action or if initial load failed but we have some old data */}
       {error && <div className="error-message general-error-display"><p>Notice: {error}</p></div>}
 
+      {/* Completed State Specific UI */}
+      {/* This part is now handled by the completion-message-block above */}
 
       {status === 'awaiting_human_verification' && verification_request && (
         <div className="human-verification-section">

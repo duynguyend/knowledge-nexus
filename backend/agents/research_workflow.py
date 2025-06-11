@@ -293,7 +293,7 @@ def synthesize_node(state: KnowledgeNexusState, llm: Optional[BaseChatModel]) ->
             state['synthesized_content'] = f"Simulated synthesis (LLM error) for topic '{state['topic']}'. Based on {len(verified_data)} sources."
             print("Synthesizer: Used simulated synthesis due to LLM error.")
     else:
-        print("Warning: LLM instance not available (OpenAI API key likely missing or invalid). Using simulated synthesis.")
+        print("Warning: LLM instance not available. This means both Azure OpenAI and standard OpenAI configurations were missing, incomplete, or failed during initialization. Using simulated synthesis. Please check your backend/.env file for `AZURE_OPENAI_*` or `OPENAI_API_KEY` variables.")
         # Placeholder synthesis if LLM is not available
         content_summary = ", ".join([item.get('snippet', 'N/A')[:50] + "..." for item in verified_data])
         state['synthesized_content'] = f"Simulated synthesis for topic '{state['topic']}': Based on {len(verified_data)} sources. Key points might include: {content_summary}"
@@ -324,7 +324,7 @@ def document_generation_node(state: KnowledgeNexusState, llm: Optional[BaseChatM
         if not synthesized_content: # If it's truly empty
              state['error_message'] = "Document generation skipped: No synthesized content available."
     elif llm is None:
-        print("Warning: LLM not available for document generation. Using synthesized content directly as final document (simulation).")
+        print("Warning: LLM instance not available for document generation. This means both Azure OpenAI and standard OpenAI configurations were missing, incomplete, or failed. Using synthesized content directly as final document (simulated formatting). Please check your backend/.env file for `AZURE_OPENAI_*` or `OPENAI_API_KEY` variables.")
         state['final_document'] = f"## Final Report (Simulated - LLM N/A for formatting) on: {state.get('topic', 'N/A')}\n\n{synthesized_content}"
         if state.get('detected_conflicts'):
             state['final_document'] += f"\n\n### Detected Conflicts:\n{len(state['detected_conflicts'])} conflicts found (details to be implemented)."
@@ -436,34 +436,65 @@ def build_knowledge_nexus_workflow(chroma_service: Optional[ChromaService] = Non
 
     # Initialize LLM instance
     llm_instance: Optional[BaseChatModel] = None
-    if AZURE_OPENAI_API_KEY and AZURE_OPENAI_ENDPOINT and OPENAI_API_VERSION and AZURE_OPENAI_DEPLOYMENT_NAME:
+    llm_initialized_boolean = False
+
+    # Fetch current environment variables inside the function to respect patching in tests
+    azure_api_key_val = os.getenv("AZURE_OPENAI_API_KEY")
+    azure_endpoint_val = os.getenv("AZURE_OPENAI_ENDPOINT")
+    openai_api_version_val = os.getenv("OPENAI_API_VERSION")
+    azure_deployment_name_val = os.getenv("AZURE_OPENAI_DEPLOYMENT_NAME")
+    openai_api_key_val = os.getenv("OPENAI_API_KEY")
+
+    # Placeholder strings to check against
+    azure_placeholders = ["YOUR_AZURE_OPENAI_API_KEY", "YOUR_AZURE_OPENAI_ENDPOINT", "YOUR_AZURE_OPENAI_DEPLOYMENT_NAME"]
+    openai_placeholder = "YOUR_OPENAI_API_KEY" # General placeholder for any OpenAI key
+
+    # 1. Attempt Azure OpenAI Initialization
+    azure_config_complete = (
+        azure_api_key_val and azure_api_key_val not in azure_placeholders and
+        azure_endpoint_val and azure_endpoint_val not in azure_placeholders and
+        openai_api_version_val and # Assuming OPENAI_API_VERSION is less likely to be a "YOUR_" placeholder
+        azure_deployment_name_val and azure_deployment_name_val not in azure_placeholders
+    )
+
+    if azure_config_complete:
+        print("Attempting to initialize AzureChatOpenAI LLM...")
         try:
             llm_instance = AzureChatOpenAI(
-                azure_endpoint=AZURE_OPENAI_ENDPOINT,
-                api_key=AZURE_OPENAI_API_KEY,
-                api_version=OPENAI_API_VERSION,
-                azure_deployment=AZURE_OPENAI_DEPLOYMENT_NAME,
+                azure_endpoint=azure_endpoint_val,
+                api_key=azure_api_key_val,
+                api_version=openai_api_version_val,
+                azure_deployment=azure_deployment_name_val,
                 temperature=0.2,
-                # model_name="gpt-3.5-turbo" # model_name is often not needed if azure_deployment is specified
             )
             print("AzureChatOpenAI LLM initialized successfully.")
+            llm_initialized_boolean = True
         except Exception as e:
-            print(f"Error initializing AzureChatOpenAI: {e}. LLM will be None.")
-            llm_instance = None # Ensure it's None on failure
+            print(f"Error initializing AzureChatOpenAI: {e}. Attempting fallback.")
+            llm_instance = None # Ensure it's None on Azure failure before fallback
     else:
-        print("WARNING: Azure OpenAI environment variables (AZURE_OPENAI_API_KEY, AZURE_OPENAI_ENDPOINT, OPENAI_API_VERSION, AZURE_OPENAI_DEPLOYMENT_NAME) not fully set. Azure LLM not initialized.")
-        # Optional: Fallback to ChatOpenAI if desired, or just leave llm_instance as None
-        # For now, let's not fallback to maintain clarity on which LLM is active.
-        # If you want a fallback:
-        # print("Attempting to fall back to standard OpenAI...")
-        # if OPENAI_API_KEY and OPENAI_API_KEY != "YOUR_ACTUAL_OPENAI_API_KEY_REPLACE_ME":
-        #     try:
-        #         llm_instance = ChatOpenAI(api_key=OPENAI_API_KEY, model_name="gpt-3.5-turbo", temperature=0.2)
-        #         print("ChatOpenAI LLM initialized successfully as a fallback.")
-        #     except Exception as e_std:
-        #         print(f"Error initializing standard ChatOpenAI as fallback: {e_std}. LLM will be None.")
-        # else:
-        #     print("Standard OPENAI_API_KEY not found or is a placeholder. No LLM will be initialized.")
+        print("Azure OpenAI environment variables are missing, incomplete, or contain placeholders. Skipping Azure LLM and attempting fallback.")
+
+    # 2. Fallback to Standard OpenAI Initialization
+    if not llm_instance: # If Azure was skipped or failed
+        print("Attempting to initialize standard ChatOpenAI LLM as fallback...")
+        if openai_api_key_val and openai_api_key_val != openai_placeholder and openai_api_key_val != "YOUR_ACTUAL_OPENAI_API_KEY_REPLACE_ME": # Added specific common placeholder
+            try:
+                llm_instance = ChatOpenAI(api_key=openai_api_key_val, model_name="gpt-3.5-turbo", temperature=0.2)
+                print("ChatOpenAI LLM initialized successfully as a fallback.")
+                llm_initialized_boolean = True
+            except Exception as e_std:
+                print(f"Error initializing standard ChatOpenAI as fallback: {e_std}. LLM will be None.")
+                llm_instance = None # Ensure it's None on standard OpenAI failure
+        else:
+            print("Standard OPENAI_API_KEY not found or is a placeholder. No LLM will be initialized via standard OpenAI.")
+            # llm_instance is already None or remains None
+
+    # 3. Final Logging
+    if not llm_instance:
+        print("CRITICAL WARNING: No LLM was initialized. Both Azure OpenAI and standard OpenAI configurations were missing, incomplete, or failed. The system will use simulated data for synthesis and document generation. Please check your backend/.env file.")
+
+    llm_initialized_boolean = llm_instance is not None # Final confirmation
 
     synthesize_node_with_llm = functools.partial(synthesize_node, llm=llm_instance)
     document_generation_node_with_llm = functools.partial(document_generation_node, llm=llm_instance)
@@ -501,7 +532,7 @@ def build_knowledge_nexus_workflow(chroma_service: Optional[ChromaService] = Non
     # Compile the graph
     app = workflow.compile()
     print("Knowledge Nexus workflow graph compiled successfully.")
-    return app
+    return app, llm_initialized_boolean
 
 # Example of how to run (for testing purposes)
 if __name__ == '__main__':
@@ -522,7 +553,8 @@ if __name__ == '__main__':
     # So, no need to create/pass it separately here for the main test block.
     # build_knowledge_nexus_workflow will handle printing warnings if keys are missing.
 
-    workflow_app = build_knowledge_nexus_workflow(chroma_service=test_chroma_service)
+    workflow_app, llm_was_initialized = build_knowledge_nexus_workflow(chroma_service=test_chroma_service)
+    print(f"LLM Initialized Status from build function: {llm_was_initialized}")
 
     # Initial state for a run
     # Example topic that might yield varied results
