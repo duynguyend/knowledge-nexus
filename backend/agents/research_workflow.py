@@ -137,45 +137,45 @@ def research_node(state: KnowledgeNexusState, chroma_service: ChromaService) -> 
     print(f"Researcher: Total research data now contains {len(state['research_data'])} items after Google Search attempt.")
 
     # Store results (simulated or real) in ChromaDB
-        if processed_results and chroma_service:
-            documents = [item['snippet'] for item in processed_results if item.get('snippet')]
-            metadatas = [
-                {
-                    "source_url": item.get('url', ''),
-                    "title": item.get('title', ''),
-                    "research_topic": topic,
-                    "original_id_from_source": item.get('id')
-                }
-                for item in processed_results if item.get('snippet')
-            ]
-            ids = [item['id'] for item in processed_results if item.get('snippet')]
+    if processed_results and chroma_service:
+        documents = [item['snippet'] for item in processed_results if item.get('snippet')]
+        metadatas = [
+            {
+                "source_url": item.get('url', ''),
+                "title": item.get('title', ''),
+                "research_topic": topic,
+                "original_id_from_source": item.get('id')
+            }
+            for item in processed_results if item.get('snippet')
+        ]
+        ids = [item['id'] for item in processed_results if item.get('snippet')]
 
-            if documents and metadatas and ids:
-                collection_name = task_id
-                print(f"Attempting to add {len(documents)} documents from current search to ChromaDB collection: {collection_name}")
-                try:
-                    added_successfully = chroma_service.add_documents(
-                        collection_name=collection_name,
-                        documents=documents,
-                        metadatas=metadatas,
-                        ids=ids
-                    )
-                    if added_successfully:
-                        print(f"Researcher: Added {len(documents)} documents to ChromaDB for task '{task_id}'.")
-                    else:
-                        print(f"Researcher: Failed to add documents to ChromaDB for task '{task_id}'.")
-                except Exception as chroma_e:
-                    print(f"Error interacting with ChromaDB: {chroma_e}")
-                    current_error = state.get('error_message', "")
-                    state['error_message'] = f"{current_error} Failed to store research data in ChromaDB: {str(chroma_e)}".strip()
-            else:
-                print("No valid documents, metadatas, or IDs from current search to add to ChromaDB.")
-        elif not chroma_service:
-             print("Warning: ChromaService not available. Skipping document storage for current search.")
-        # Removed the broad try-except that was specific to Tavily
-    # else: # This was part of the removed Tavily key check block
-        # print("This part should not be reached if Google search logic is complete")
-        pass
+        if documents and metadatas and ids:
+            collection_name = task_id
+            print(f"Attempting to add {len(documents)} documents from current search to ChromaDB collection: {collection_name}")
+            try:
+                added_successfully = chroma_service.add_documents(
+                    collection_name=collection_name,
+                    documents=documents,
+                    metadatas=metadatas,
+                    ids=ids
+                )
+                if added_successfully:
+                    print(f"Researcher: Added {len(documents)} documents to ChromaDB for task '{task_id}'.")
+                else:
+                    print(f"Researcher: Failed to add documents to ChromaDB for task '{task_id}'.")
+            except Exception as chroma_e:
+                print(f"Error interacting with ChromaDB: {chroma_e}")
+                current_error = state.get('error_message', "")
+                state['error_message'] = f"{current_error} Failed to store research data in ChromaDB: {str(chroma_e)}".strip()
+        else:
+            print("No valid documents, metadatas, or IDs from current search to add to ChromaDB.")
+    elif not chroma_service:
+         print("Warning: ChromaService not available. Skipping document storage for current search.")
+    # Removed the broad try-except that was specific to Tavily
+# else: # This was part of the removed Tavily key check block
+    # print("This part should not be reached if Google search logic is complete")
+    pass
 
 
     state['human_in_loop_needed'] = False

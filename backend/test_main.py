@@ -14,14 +14,11 @@ client = TestClient(app)
 def test_health_check():
     response = client.get("/health")
     assert response.status_code == 200
-    # This assertion reflects the current actual state where services are "failed".
-    # This allows the test to pass while highlighting that the services
-    # are not initializing correctly in main.py.
     assert response.json() == {
         "status": "ok",
         "services": {
-            "chroma_service": "failed",
-            "knowledge_nexus_graph": "failed"
+            "chroma_service": "initialized",
+            "knowledge_nexus_graph": "initialized"
         }
     }
 
@@ -126,7 +123,7 @@ def test_submit_verification_success():
 
     assert task_id in active_tasks
     updated_task = active_tasks[task_id]
-    assert updated_task["status"] == "failed" # Changed from "resuming_after_verification"
+    assert updated_task["status"] == "resuming_after_verification"
     assert "human_feedback" in updated_task["graph_state"]
     assert updated_task["graph_state"]["human_feedback"]["data_id"] == verification_data_id
     assert updated_task["graph_state"]["human_feedback"]["approved"] is True # Changed from is_approved
