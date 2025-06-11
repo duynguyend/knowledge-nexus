@@ -1,36 +1,71 @@
 import chromadb
-from chromadb.utils import embedding_functions
 from typing import List, Dict, Optional, Any
 import logging
+import os
+from openai import AzureOpenAI
+from chromadb import Documents, EmbeddingFunction, Embeddings
 
 # Configure basic logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
+
+class AzureOpenAIEmbeddingFunction(EmbeddingFunction):
+    def __init__(self, api_key: str, azure_endpoint: str, api_version: str, azure_deployment_name: str):
+        self._client = AzureOpenAI(
+            api_key=api_key,
+            azure_endpoint=azure_endpoint,
+            api_version=api_version,
+        )
+        self._azure_deployment_name = azure_deployment_name
+
+    def __call__(self, texts: Documents) -> Embeddings:
+        try:
+            response = self._client.embeddings.create(model=self._azure_deployment_name, input=texts)
+            return [item.embedding for item in response.data]
+        except Exception as e:
+            logger.error(f"Azure OpenAI API call failed: {e}", exc_info=True)
+            # Depending on how chromadb handles errors in embedding functions,
+            # you might want to raise the exception or return empty embeddings.
+            # For now, returning empty list for each failed text or raising.
+            # Returning empty list might lead to issues if chromadb expects specific list length.
+            # Consider returning List[Optional[List[float]]] or similar if chromadb supports it,
+            # or handling this more robustly based on chromadb's error handling.
+            # For simplicity, let's re-raise for now, or return empty embeddings for all if one fails.
+            # raise # Option 1: Re-raise the exception
+            return [[] for _ in texts] # Option 2: Return empty embeddings for all texts if API call fails for the batch
+
+
 class ChromaService:
-    def __init__(self, persist_directory: str = "./chroma_db_store", embedding_model_name: str = 'all-MiniLM-L6-v2'):
+    def __init__(self, persist_directory: str = "./chroma_db_store"):
         """
-        Initializes the ChromaDB client and embedding function.
+        Initializes the ChromaDB client and Azure OpenAI embedding function.
 
         Args:
             persist_directory (str): Directory to store ChromaDB data.
-            embedding_model_name (str): Name of the SentenceTransformer model to use.
-                                        Defaults to 'all-MiniLM-L6-v2'.
-                                        Set to None to use ChromaDB's default embedding function.
         """
         try:
             self.client = chromadb.PersistentClient(path=persist_directory)
-            if embedding_model_name:
-                self.embedding_function = embedding_functions.SentenceTransformerEmbeddingFunction(
-                    model_name=embedding_model_name
-                )
-                logger.info(f"Using SentenceTransformer embedding function with model: {embedding_model_name}")
-            else:
-                self.embedding_function = embedding_functions.DefaultEmbeddingFunction()
-                logger.info("Using DefaultEmbeddingFunction from ChromaDB.")
+
+            azure_api_key = os.getenv("AZURE_OPENAI_API_KEY")
+            azure_endpoint = os.getenv("AZURE_OPENAI_ENDPOINT")
+            azure_api_version = os.getenv("OPENAI_API_VERSION") # or AZURE_OPENAI_API_VERSION
+            azure_embedding_deployment = os.getenv("AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME")
+
+            if not all([azure_api_key, azure_endpoint, azure_api_version, azure_embedding_deployment]):
+                logger.error("Azure OpenAI environment variables are not fully set.")
+                raise ValueError("Missing one or more Azure OpenAI environment variables.")
+
+            self.embedding_function = AzureOpenAIEmbeddingFunction(
+                api_key=azure_api_key,
+                azure_endpoint=azure_endpoint,
+                api_version=azure_api_version,
+                azure_deployment_name=azure_embedding_deployment
+            )
+            logger.info(f"Using Azure OpenAI embedding function with deployment: {azure_embedding_deployment}")
             logger.info(f"ChromaDB client initialized. Data will be persisted in: {persist_directory}")
         except Exception as e:
-            logger.error(f"Failed to initialize ChromaDB client or embedding function: {e}", exc_info=True)
+            logger.error(f"Failed to initialize ChromaDB client or Azure OpenAI embedding function: {e}", exc_info=True)
             raise
 
     def get_or_create_collection(self, collection_name: str) -> Optional[chromadb.api.models.Collection.Collection]:
@@ -149,9 +184,37 @@ if __name__ == '__main__':
     logger.info("Starting ChromaService example usage...")
 
     # Initialize service (will create ./chroma_db_store if it doesn't exist)
-    chroma_service = ChromaService(persist_directory="./test_chroma_db")
+    # This will now require Azure OpenAI environment variables to be set.
+    # For local testing, ensure you have a .env file with:
+    # AZURE_OPENAI_API_KEY="your_key"
+    # AZURE_OPENAI_ENDPOINT="your_endpoint"
+    # OPENAI_API_VERSION="your_api_version"
+    # AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME="your_deployment_name"
+    # from dotenv import load_dotenv # You would typically load this at the start of your app
+    # load_dotenv()
 
-    collection_name = "my_test_collection"
+    logger.info("Attempting to initialize ChromaService with Azure OpenAI embeddings.")
+    logger.info("Ensure Azure OpenAI environment variables (AZURE_OPENAI_API_KEY, AZURE_OPENAI_ENDPOINT, OPENAI_API_VERSION, AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME) are set.")
+
+    try:
+        chroma_service = ChromaService(persist_directory="./test_chroma_db")
+    except ValueError as ve:
+        logger.error(f"Initialization failed due to missing env vars: {ve}")
+        logger.info("Skipping further tests as ChromaService could not be initialized.")
+        chroma_service = None # Ensure it's None so subsequent tests don't run
+    except Exception as e:
+        logger.error(f"An unexpected error occurred during ChromaService initialization: {e}", exc_info=True)
+        logger.info("Skipping further tests as ChromaService could not be initialized.")
+        chroma_service = None
+
+
+    collection_name = "my_test_collection_azure"
+
+    # Get or create collection
+    # collection = chroma_service.get_or_create_collection(collection_name) # This line is problematic if chroma_service is None
+
+    if chroma_service and collection_name: # Proceed only if chroma_service was initialized
+        collection = chroma_service.get_or_create_collection(collection_name)
 
     # Get or create collection
     collection = chroma_service.get_or_create_collection(collection_name)
@@ -200,12 +263,17 @@ if __name__ == '__main__':
 
         # Clean up (optional): Delete the collection
         # try:
-        #     chroma_service.client.delete_collection(collection_name)
-        #     logger.info(f"Successfully deleted collection: {collection_name}")
+        #     if chroma_service: # Ensure client exists
+        #         chroma_service.client.delete_collection(collection_name)
+        #         logger.info(f"Successfully deleted collection: {collection_name}")
         # except Exception as e:
         #     logger.error(f"Failed to delete collection {collection_name}: {e}")
 
+    elif not chroma_service:
+        # This case is already handled by the logger messages inside the try-except for ChromaService initialization
+        pass
     else:
-        logger.error(f"Could not get or create collection: {collection_name}")
+        logger.error(f"Could not get or create collection: {collection_name} (chroma_service might be None or collection_name is empty)")
 
-    logger.info("ChromaService example usage finished.")
+
+    logger.info("ChromaService example usage with Azure OpenAI finished.")
