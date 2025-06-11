@@ -205,33 +205,34 @@ def verify_node(state: KnowledgeNexusState, chroma_service: ChromaService) -> Kn
 
     # Simulate needing human input for a piece of data
     if state['verified_data']: # If there's data, pretend one item needs verification
-        item_to_verify = state['verified_data'][0]
-        # Ensure data_to_verify has the expected structure for DataVerificationRequest's DataSource
-        # For this placeholder, we'll simplify. In reality, DataSource would be created from item_to_verify
-        dummy_data_source_for_request = {
-            "id": item_to_verify.get("source_id", "unknown_id"),
-            "url": item_to_verify.get("url"),
-            "content_preview": item_to_verify.get("content", "")[:100] # Preview
-        }
+        # item_to_verify = state['verified_data'][0]
+        # # Ensure data_to_verify has the expected structure for DataVerificationRequest's DataSource
+        # # For this placeholder, we'll simplify. In reality, DataSource would be created from item_to_verify
+        # dummy_data_source_for_request = {
+        #     "id": item_to_verify.get("source_id", "unknown_id"),
+        #     "url": item_to_verify.get("url"),
+        #     "content_preview": item_to_verify.get("content", "")[:100] # Preview
+        # }
 
-        # Check if DataVerificationRequest is the real one or the dummy
-        if "task_id" in DataVerificationRequest.__annotations__: # Check if it's the Pydantic model
-             verification_request = DataVerificationRequest(
-                task_id=state['task_id'],
-                data_id=item_to_verify.get("source_id", "unknown_id"),
-                data_to_verify=dummy_data_source_for_request, # This should match DataSource schema
-                conflicting_sources=[]
-            )
-        else: # It's the dummy TypedDict
-            verification_request = {
-                "task_id":state['task_id'],
-                "data_id": item_to_verify.get("source_id", "unknown_id"),
-                "data_to_verify": dummy_data_source_for_request
-            }
+        # # Check if DataVerificationRequest is the real one or the dummy
+        # if "task_id" in DataVerificationRequest.__annotations__: # Check if it's the Pydantic model
+        #      verification_request = DataVerificationRequest(
+        #         task_id=state['task_id'],
+        #         data_id=item_to_verify.get("source_id", "unknown_id"),
+        #         data_to_verify=dummy_data_source_for_request, # This should match DataSource schema
+        #         conflicting_sources=[]
+        #     )
+        # else: # It's the dummy TypedDict
+        #     verification_request = {
+        #         "task_id":state['task_id'],
+        #         "data_id": item_to_verify.get("source_id", "unknown_id"),
+        #         "data_to_verify": dummy_data_source_for_request
+        #     }
 
-        state['current_verification_request'] = verification_request
-        state['human_in_loop_needed'] = True
-        print(f"Simulating human verification needed for item: {item_to_verify.get('source_id')}")
+        state['current_verification_request'] = None
+        state['human_in_loop_needed'] = False
+        # print(f"Simulating human verification needed for item: {item_to_verify.get('source_id')}")
+        print(f"Human verification no longer triggered by default in verify_node.")
     else:
         state['human_in_loop_needed'] = False
         state['current_verification_request'] = None
