@@ -2,6 +2,13 @@ import pytest
 from fastapi.testclient import TestClient
 from backend.main import app  # Assuming your FastAPI app instance is named 'app' in main.py
 
+import os
+from unittest import mock # For patch.dict and patch
+from unittest.mock import MagicMock # Explicitly import MagicMock
+from langchain_openai import AzureChatOpenAI, ChatOpenAI
+from langchain_core.language_models.chat_models import BaseChatModel
+from backend.agents.research_workflow import build_knowledge_nexus_workflow
+
 client = TestClient(app)
 
 def test_health_check():
@@ -220,3 +227,62 @@ def test_get_task_results_failed():
     # Optionally assert the detail:
     # assert response.json()["detail"] == f"Task ended inconclusively. Status: failed. Error: {error_msg}"
     del active_tasks[task_id]
+
+def test_llm_initialization_priority(monkeypatch):
+    # Clean up relevant env vars first if they were set by the system/shell
+    monkeypatch.delenv("AZURE_OPENAI_API_KEY", raising=False)
+    monkeypatch.delenv("AZURE_OPENAI_ENDPOINT", raising=False)
+    monkeypatch.delenv("OPENAI_API_VERSION", raising=False)
+    monkeypatch.delenv("AZURE_OPENAI_DEPLOYMENT_NAME", raising=False)
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+
+    # Case 1: Azure OpenAI environment variables are set
+    monkeypatch.setenv("AZURE_OPENAI_API_KEY", "test_azure_key")
+    monkeypatch.setenv("AZURE_OPENAI_ENDPOINT", "https://test.azure.com")
+    monkeypatch.setenv("OPENAI_API_VERSION", "test_version")
+    monkeypatch.setenv("AZURE_OPENAI_DEPLOYMENT_NAME", "test_deployment")
+
+    # Mock ChatOpenAI and AzureChatOpenAI to prevent actual API calls and check instantiation
+    with mock.patch('langchain_openai.AzureChatOpenAI', autospec=True) as mock_azure_chat_openai,          mock.patch('langchain_openai.ChatOpenAI', autospec=True) as mock_chat_openai:
+
+        # Configure the mock AzureChatOpenAI to return a MagicMock that also identifies as an AzureChatOpenAI instance
+        # This helps in asserting the instance type if needed, beyond just checking if it's the return_value.
+        mock_azure_chat_openai.return_value = MagicMock(spec=AzureChatOpenAI)
+        # If you need to simulate methods on the llm_instance, configure them on mock_azure_chat_openai.return_value
+        # e.g., mock_azure_chat_openai.return_value.invoke.return_value = "mocked LLM response"
+
+
+        workflow_app_azure = build_knowledge_nexus_workflow(chroma_service=None) # Pass dummy chroma
+
+        # Check that AzureChatOpenAI was called with the right parameters
+        mock_azure_chat_openai.assert_called_once_with(
+            azure_endpoint="https://test.azure.com",
+            api_key="test_azure_key",
+            api_version="test_version",
+            azure_deployment="test_deployment",
+            temperature=0.2
+        )
+        # Check that the llm instance in the graph nodes is from the Azure mock
+        synthesize_node_func_azure = workflow_app_azure.nodes['synthesize'].func
+        assert synthesize_node_func_azure.keywords.get('llm') == mock_azure_chat_openai.return_value
+        mock_chat_openai.assert_not_called() # Standard OpenAI should not be called
+
+    # Clean up for next case
+    monkeypatch.delenv("AZURE_OPENAI_API_KEY", raising=False)
+    monkeypatch.delenv("AZURE_OPENAI_ENDPOINT", raising=False)
+    monkeypatch.delenv("OPENAI_API_VERSION", raising=False)
+    monkeypatch.delenv("AZURE_OPENAI_DEPLOYMENT_NAME", raising=False)
+
+    # Case 2: Azure OpenAI variables are NOT set, llm_instance should be None
+    # (as current research_workflow.py does not fallback to ChatOpenAI if Azure vars are missing)
+    with mock.patch('langchain_openai.AzureChatOpenAI', autospec=True) as mock_azure_chat_openai_none,          mock.patch('langchain_openai.ChatOpenAI', autospec=True) as mock_chat_openai_none:
+
+        workflow_app_none = build_knowledge_nexus_workflow(chroma_service=None)
+
+        mock_azure_chat_openai_none.assert_not_called()
+        mock_chat_openai_none.assert_not_called() # Standard OpenAI should not be called either
+
+        synthesize_node_func_none = workflow_app_none.nodes['synthesize'].func
+        assert synthesize_node_func_none.keywords.get('llm') is None
+
+    # monkeypatch.delenv("OPENAI_API_KEY", raising=False) # Example if OpenAI fallback were tested

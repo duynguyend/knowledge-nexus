@@ -170,15 +170,38 @@ This section outlines the steps to set up and run the backend server for Knowled
 
 4.  **Environment Variables:**
     The backend uses a `.env` file for configuration, such as API keys, database connection strings, or other settings.
-    *   Locate or create a file named `.env` in the `backend/` directory.
-    *   Populate it with the necessary key-value pairs. Example:
+    *   Create a `.env` file in the `backend/` directory by copying the `backend/.env.example` file:
+        ```bash
+        cp backend/.env.example backend/.env
+        ```
+    *   Then, populate `backend/.env` with your specific key-value pairs. The application is configured to use Azure OpenAI by default if the relevant variables are set.
+
+    *   **Key Environment Variables (refer to `backend/.env.example` for a full list):**
+        *   `TAVILY_API_KEY`: Your API key for Tavily Search.
+        *   `AZURE_OPENAI_API_KEY`: Your API key for Azure OpenAI.
+        *   `AZURE_OPENAI_ENDPOINT`: Your Azure OpenAI service endpoint (e.g., `https://your-resource-name.openai.azure.com/`).
+        *   `OPENAI_API_VERSION`: The API version for Azure OpenAI (e.g., `2023-07-01-preview`).
+        *   `AZURE_OPENAI_DEPLOYMENT_NAME`: The name of your model deployment in Azure AI Studio.
+        *   `OPENAI_API_KEY` (Optional): Standard OpenAI API key. Can be used if Azure variables are not set and fallback is implemented, or for other OpenAI direct uses.
+
+    *   Example content for `backend/.env`:
         ```env
         # backend/.env
-        OPENAI_API_KEY="your_openai_api_key_here"
-        LANGSMITH_API_KEY="your_langsmith_api_key_here"
-        # Add other necessary environment variables
+        TAVILY_API_KEY="your_tavily_api_key"
+
+        # Azure OpenAI Credentials (Recommended)
+        AZURE_OPENAI_API_KEY="your_azure_openai_api_key"
+        AZURE_OPENAI_ENDPOINT="https://your-resource.openai.azure.com/"
+        OPENAI_API_VERSION="2023-07-01-preview"
+        AZURE_OPENAI_DEPLOYMENT_NAME="your_deployment_name"
+
+        # Optional: Standard OpenAI API Key (if not using Azure or for fallback)
+        # OPENAI_API_KEY="your_openai_api_key_here"
+
+        # Langsmith API Key (if used)
+        # LANGSMITH_API_KEY="your_langsmith_api_key_here"
         ```
-    *   Ensure this `.env` file is listed in your `.gitignore` file to prevent committing sensitive information. The `python-dotenv` package (listed in `requirements.txt`) will automatically load these variables when the application starts.
+    *   Ensure the `.env` file is listed in your `.gitignore` file to prevent committing sensitive information. The `python-dotenv` package (listed in `requirements.txt`) will automatically load these variables when the application starts.
 
 5.  **Run the Backend Server:**
     Once the dependencies are installed and environment variables are set up, you can run the FastAPI development server using Uvicorn:
