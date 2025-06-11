@@ -231,10 +231,20 @@ async def get_task_status_endpoint(task_id: str):
     elif status == "queued": current_progress = 0.1
     elif status == "resuming_after_verification": current_progress = 0.45 # Between await and running
 
+    topic = task.get('topic', 'N/A') # Default topic if not found
+    error_message = task.get("error_message")
+
+    if status == "completed":
+        message = f"Research completed for topic: {topic}"
+    elif status in ["failed", "error_in_workflow"]:
+        message = error_message or f"Research failed for topic: {topic}. No specific error message."
+    else:
+        message = f"Current status for topic: {topic}"
+
     return ResearchStatus(
         task_id=task_id,
         status=status,
-        message=task.get("error_message") or f"Current status for topic: {task.get('topic')}",
+        message=message,
         progress=current_progress,
         timestamp=datetime.utcnow(), # Consider storing task creation/update timestamp in active_tasks
         verification_request=verification_req_data # This is now correctly populated
