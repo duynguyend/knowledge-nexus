@@ -61,10 +61,18 @@ function ResearchProgress({ taskId }) {
   }, [taskId, statusDetails]); // Added statusDetails to dependencies of fetchStatus
 
   useEffect(() => {
+    // --- Logging point 1: Start of useEffect ---
+    console.log(`Task ${taskId}: useEffect re-running. Current statusDetails.status: ${statusDetails?.status}`);
     if (!taskId) {
       setStatusDetails(null);
       setError(null);
       return;
+    }
+
+    // --- Logging point 2: Inside initial check for terminal status ---
+    if (statusDetails && (statusDetails.status === 'completed' || statusDetails.status === 'failed')) {
+      console.log(`Task ${taskId}: Status is already terminal (${statusDetails?.status}). Not starting new interval.`);
+      return; // Return early, no interval needed
     }
 
     fetchStatus(true); // Initial fetch with main loading indicator
@@ -72,19 +80,29 @@ function ResearchProgress({ taskId }) {
     const intervalId = setInterval(async () => {
       if (document.hidden) return; // Don't poll if tab is not visible
 
-      // Check if polling should continue based on current statusDetails
+      // Check if polling should continue based on current statusDetails (again, inside interval)
       if (statusDetails && (statusDetails.status === 'completed' || statusDetails.status === 'failed')) {
+        // This specific log might be redundant if the outer check already caught it, but good for safety.
+        console.log(`Task ${taskId}: Interval callback for ID ${intervalId}: Status became terminal (${statusDetails.status}). Clearing interval.`);
         clearInterval(intervalId);
         return;
       }
 
-      const shouldContinue = await fetchStatus(false); // Subsequent fetches are background polls
-      if (!shouldContinue) {
+      const shouldContinuePolling = await fetchStatus(false); // Subsequent fetches are background polls
+      if (!shouldContinuePolling) {
+        // --- Logging point 4: fetchStatus returned false (completed/failed) ---
+        console.log(`Task ${taskId}: Interval callback for ID ${intervalId}: fetchStatus returned false (e.g. completed/failed). Clearing interval.`);
         clearInterval(intervalId);
       }
     }, DEFAULT_POLL_INTERVAL);
+    // --- Logging point 3: After setInterval ---
+    console.log(`Task ${taskId}: Setting up new polling interval. Interval ID: ${intervalId}`);
 
-    return () => clearInterval(intervalId);
+    // --- Logging point 5: useEffect cleanup ---
+    return () => {
+      console.log(`Task ${taskId}: useEffect cleanup function called. Clearing interval ID: ${intervalId}.`);
+      clearInterval(intervalId);
+    };
   }, [taskId, fetchStatus, statusDetails]); // Added statusDetails to useEffect dependencies
 
   const handleSubmitVerification = async (event) => {

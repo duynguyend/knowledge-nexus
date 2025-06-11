@@ -154,8 +154,9 @@ async def run_research_workflow_async(task_id: str, topic: str, initial_graph_in
                 "final_document_preview": final_event_state.get('final_document', '')[:250] + "...",
                 "final_graph_state": final_event_state
             })
-             # --- Logging modification: Enhanced completion print ---
-             print(f"Task {task_id}: Workflow completed successfully. Final stage: {final_event_state.get('current_stage')}")
+             active_tasks[task_id]['current_stage'] = "completed" # <--- Explicitly ensure it's set
+             # Ensure the print statement reflects the update made to active_tasks[task_id]['current_stage']
+             print(f"Task {task_id}: Workflow completed successfully. Final stage set to: {active_tasks[task_id]['current_stage']}")
         else:
             # This case might occur if the stream somehow ends without any event after resumption,
             # or if initial_graph_input was already a terminal state.
