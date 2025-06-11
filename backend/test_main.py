@@ -18,6 +18,10 @@ from datetime import datetime, timezone
 # Mock datetime globally for consistent timestamps
 MOCK_DATETIME = datetime(2024, 1, 1, 12, 0, 0, tzinfo=timezone.utc)
 
+# Import ChromaService for the new test
+from backend.services.chroma_service import ChromaService
+import shutil # For cleaning up test directories
+
 @pytest.fixture(autouse=True)
 def mock_datetime_utcnow(monkeypatch):
     class MockDatetime(datetime):
@@ -316,3 +320,44 @@ def cleanup_active_tasks():
     # If a test ID is missed, it could affect other tests.
     # The current approach is to delete specific task_ids within each test.
     pass
+
+
+def test_add_documents_simulated_chroma_failure(monkeypatch):
+    # Mock environment variables for ChromaService initialization
+    monkeypatch.setenv("AZURE_OPENAI_EMBEDDING_API_KEY", "test_key")
+    monkeypatch.setenv("AZURE_OPENAI_ENDPOINT", "test_endpoint")
+    monkeypatch.setenv("OPENAI_API_VERSION", "test_version")
+    monkeypatch.setenv("AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME", "test_deployment")
+
+    chroma_service_instance = ChromaService(persist_directory="./test_chroma_db_add_fail")
+
+    mock_collection_instance = MagicMock()
+    # Simulate an error during the collection.add() operation
+    # This error would be analogous to an embedding function failure that propagates up,
+    # or any other internal error within chromadb's add method.
+    mock_collection_instance.add.side_effect = Exception("Simulated ChromaDB add failure")
+
+    # Patch ChromaService's get_or_create_collection to return the mock_collection_instance
+    # This ensures that when add_documents calls get_or_create_collection, it receives our mock.
+    with patch.object(chroma_service_instance, 'get_or_create_collection', return_value=mock_collection_instance) as mock_get_create_collection:
+        result = chroma_service_instance.add_documents(
+            collection_name="test_fail_collection",
+            documents=["doc1"],
+            metadatas=[{"src": "test"}],
+            ids=["id1"]
+        )
+        assert result is False # Expect add_documents to return False on failure
+
+        # Verify that get_or_create_collection was called correctly
+        mock_get_create_collection.assert_called_once_with("test_fail_collection")
+
+        # Verify that the 'add' method on our mock collection was called correctly
+        mock_collection_instance.add.assert_called_once_with(
+            documents=["doc1"],
+            metadatas=[{"src": "test"}],
+            ids=["id1"]
+        )
+
+    # Clean up test directory
+    if os.path.exists("./test_chroma_db_add_fail"):
+        shutil.rmtree("./test_chroma_db_add_fail")
