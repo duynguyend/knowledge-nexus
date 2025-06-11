@@ -108,6 +108,10 @@ def research_node(state: KnowledgeNexusState, chroma_service: ChromaService) -> 
         try:
             print(f"Attempting Google Custom Search for query: '{topic}'")
             service = build("customsearch", "v1", developerKey=GOOGLE_API_KEY)
+            # By default, when 'searchType' is not specified, the API returns web page results.
+            # Note: The Programmable Search Engine (PSE) configuration (via GOOGLE_CSE_ID)
+            # in the Google Cloud Console also influences search scope. Ensure it's configured
+            # to 'Search the entire web' or for web-only sources for best results.
             result = service.cse().list(q=topic, cx=GOOGLE_CSE_ID, num=20).execute()
 
             google_search_items = result.get("items", [])
