@@ -74,6 +74,7 @@ class KnowledgeNexusState(TypedDict): # type: ignore
 # 2. Implement Agent Nodes
 # Updated research_node to include chroma_service and use it
 def research_node(state: KnowledgeNexusState, chroma_service: ChromaService) -> KnowledgeNexusState:
+    print(f"--- Entering RESEARCH_NODE --- Task ID: {state.get('task_id')}, Current Stage: {state.get('current_stage')}")
     state['current_stage'] = "researching"
     print(f"\n--- Agent: Researcher (Stage: {state['current_stage']}) ---")
     topic = state.get('topic')
@@ -189,6 +190,7 @@ def research_node(state: KnowledgeNexusState, chroma_service: ChromaService) -> 
 
 # Updated verify_node to include chroma_service in signature
 def verify_node(state: KnowledgeNexusState, chroma_service: ChromaService) -> KnowledgeNexusState:
+    print(f"--- Entering VERIFY_NODE --- Task ID: {state.get('task_id')}, Current Stage: {state.get('current_stage')}, Research data items: {len(state.get('research_data', []))}")
     state['current_stage'] = "verifying"
     print(f"\n--- Agent: Verifier (Stage: {state['current_stage']}) ---")
     if chroma_service:
@@ -243,6 +245,7 @@ def verify_node(state: KnowledgeNexusState, chroma_service: ChromaService) -> Kn
     return state
 
 def synthesize_node(state: KnowledgeNexusState, llm: Optional[BaseChatModel]) -> KnowledgeNexusState:
+    print(f"--- Entering SYNTHESIZE_NODE --- Task ID: {state.get('task_id')}, Current Stage: {state.get('current_stage')}, Verified data items: {len(state.get('verified_data', []))}")
     state['current_stage'] = "synthesizing"
     print(f"\n--- Agent: Synthesizer (Stage: {state['current_stage']}) ---")
     state['error_message'] = None # Clear previous errors
@@ -299,6 +302,7 @@ def synthesize_node(state: KnowledgeNexusState, llm: Optional[BaseChatModel]) ->
     return state
 
 def conflict_detection_node(state: KnowledgeNexusState) -> KnowledgeNexusState:
+    print(f"--- Entering CONFLICT_DETECTION_NODE --- Task ID: {state.get('task_id')}, Current Stage: {state.get('current_stage')}")
     state['current_stage'] = "detecting_conflicts"
     print(f"\n--- Agent: Conflict Detector (Stage: {state['current_stage']}) ---")
     print("Checking for conflicts...")
@@ -308,6 +312,7 @@ def conflict_detection_node(state: KnowledgeNexusState) -> KnowledgeNexusState:
     return state
 
 def document_generation_node(state: KnowledgeNexusState, llm: Optional[BaseChatModel]) -> KnowledgeNexusState:
+    print(f"--- Entering DOCUMENT_GENERATION_NODE --- Task ID: {state.get('task_id')}, Current Stage: {state.get('current_stage')}, Synthesized content length: {len(state.get('synthesized_content', ''))}")
     state['current_stage'] = "generating_document"
     print(f"\n--- Agent: Document Generator (Stage: {state['current_stage']}) ---")
     state['error_message'] = None # Clear previous errors
@@ -338,6 +343,7 @@ def document_generation_node(state: KnowledgeNexusState, llm: Optional[BaseChatM
     return state
 
 def await_human_input_node(state: KnowledgeNexusState) -> KnowledgeNexusState:
+    print(f"--- Entering AWAIT_HUMAN_INPUT_NODE --- Task ID: {state.get('task_id')}, Current Stage: {state.get('current_stage')}, Human in loop needed: {state.get('human_in_loop_needed')}, Feedback provided: {state.get('human_feedback') is not None}")
     print(f"\n--- Workflow: Awaiting Human Input ---") # Original print
     feedback = state.get('human_feedback')
 
@@ -400,7 +406,8 @@ def await_human_input_node(state: KnowledgeNexusState) -> KnowledgeNexusState:
 
 # 3. Implement Conditional Edges
 def should_request_human_verification(state: KnowledgeNexusState) -> str:
-    print(f"\n--- Workflow: Conditional Edge ---")
+    print(f"--- Conditional Edge: SHOULD_REQUEST_HUMAN_VERIFICATION --- Task ID: {state.get('task_id')}, Current Stage: {state.get('current_stage')}, Human in loop needed: {state.get('human_in_loop_needed')}, Verification request active: {state.get('current_verification_request') is not None}")
+    print(f"\n--- Workflow: Conditional Edge ---") # Existing print
     if state.get('human_in_loop_needed') and state.get('current_verification_request'):
         print("Decision: Human verification IS needed.")
         return "human_verification_needed"
