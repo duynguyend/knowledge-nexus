@@ -108,7 +108,7 @@ def research_node(state: KnowledgeNexusState, chroma_service: ChromaService) -> 
         try:
             print(f"Attempting Google Custom Search for query: '{topic}'")
             service = build("customsearch", "v1", developerKey=GOOGLE_API_KEY)
-            result = service.cse().list(q=topic, cx=GOOGLE_CSE_ID, num=5).execute()
+            result = service.cse().list(q=topic, cx=GOOGLE_CSE_ID, num=20).execute()
 
             google_search_items = result.get("items", [])
             print(f"Google Search returned {len(google_search_items)} items.")
