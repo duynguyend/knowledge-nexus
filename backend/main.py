@@ -66,13 +66,44 @@ app.add_middleware(
 # --- Services Initialization ---
 chroma_service_instance: Optional[ChromaService] = None
 knowledge_nexus_graph: Optional[Any] = None
+llm_is_available: bool = False # Initialize with a default
 try:
     chroma_service_instance = ChromaService(persist_directory="./chroma_db_store")
-    knowledge_nexus_graph = build_knowledge_nexus_workflow(chroma_service=chroma_service_instance)
+    # Update call to receive both graph and LLM status
+    knowledge_nexus_graph, llm_is_available = build_knowledge_nexus_workflow(chroma_service=chroma_service_instance)
+
     if not knowledge_nexus_graph:
-        print("Warning: Knowledge Nexus workflow graph failed to initialize properly but no exception was raised.")
+        print("CRITICAL WARNING: Knowledge Nexus workflow graph itself failed to initialize properly (returned None).")
+
+    if not llm_is_available:
+        # Prominent warning if LLM initialization failed
+        print("\n" + "#" * 70)
+        print("#" + " " * 68 + "#")
+        print("#  WARNING: NO LLM INITIALIZED!                                                      #")
+        print("#  The Knowledge Nexus API is starting in a DEGRADED MODE.                           #")
+        print("#  Both Azure OpenAI and standard OpenAI configurations were missing, incomplete,    #")
+        print("#  or failed during initialization.                                                  #")
+        print("#  The system will use SIMULATED LLM RESPONSES for synthesis and document generation.#")
+        print("#  Please check your backend/.env file for AZURE_OPENAI_* or OPENAI_API_KEY values.  #")
+        print("#" + " " * 68 + "#")
+        print("#" * 70 + "\n")
+    else:
+        print("LLM initialized successfully. API starting in normal mode.")
+
 except Exception as e:
     print(f"Critical Error: Failed to initialize ChromaService or Knowledge Nexus workflow: {e}")
+    # Ensure llm_is_available is False if there was an exception during setup
+    llm_is_available = False
+    # Print the LLM warning here as well, as the above block might be skipped
+    print("\n" + "#" * 70)
+    print("#" + " " * 68 + "#")
+    print("#  WARNING: NO LLM INITIALIZED DUE TO EXCEPTION DURING STARTUP!                #")
+    print("#  The Knowledge Nexus API is starting in a DEGRADED MODE.                           #")
+    print("#  The system will use SIMULATED LLM RESPONSES.                                      #")
+    print("#  Review the error message above and check your backend/.env file.                #")
+    print("#" + " " * 68 + "#")
+    print("#" * 70 + "\n")
+
 
 # --- In-Memory Task Store ---
 active_tasks: Dict[str, Dict[str, Any]] = {}
