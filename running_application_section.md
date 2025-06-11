@@ -3,7 +3,7 @@
 To run the Knowledge Nexus application locally, both the backend and frontend development servers must be running simultaneously. They typically operate in separate terminal sessions.
 
 1.  **Start the Backend Server:**
-    *   Navigate to the `knowledge_nexus/backend` directory.
+    *   Navigate to the `backend` directory.
     *   Ensure your Python virtual environment is activated.
     *   Run the command:
         ```bash
@@ -12,7 +12,7 @@ To run the Knowledge Nexus application locally, both the backend and frontend de
     *   The backend API server will typically be available at `http://localhost:8000`.
 
 2.  **Start the Frontend Development Server:**
-    *   Navigate to the `knowledge_nexus/frontend` directory.
+    *   Navigate to the `frontend` directory.
     *   Run the command:
         ```bash
         npm start

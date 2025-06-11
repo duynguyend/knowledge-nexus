@@ -12,9 +12,8 @@ This section outlines the steps to set up and run the backend server for Knowled
 1.  **Navigate to the Backend Directory:**
     Open your terminal and change to the backend directory:
     ```bash
-    cd knowledge_nexus/backend
+    cd backend
     ```
-    *(Adjust `knowledge_nexus/` if your project is cloned under a different root name).*
 
 2.  **Create and Activate a Virtual Environment:**
     It's highly recommended to use a virtual environment to manage project dependencies.
