@@ -33,7 +33,9 @@ class AzureOpenAIEmbeddingFunction(EmbeddingFunction):
             # or handling this more robustly based on chromadb's error handling.
             # For simplicity, let's re-raise for now, or return empty embeddings for all if one fails.
             # raise # Option 1: Re-raise the exception
-            return [[] for _ in texts] # Option 2: Return empty embeddings for all texts if API call fails for the batch
+            # return [[] for _ in texts] # Option 2: Return empty embeddings for all texts if API call fails for the batch
+            # Re-raise the exception to propagate the error upstream.
+            raise
 
 
 class ChromaService:
