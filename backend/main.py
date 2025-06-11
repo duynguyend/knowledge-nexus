@@ -103,6 +103,8 @@ async def run_research_workflow_async(task_id: str, topic: str, initial_graph_in
     try:
         config = {"configurable": {"thread_id": task_id}}
         final_event_state = None # Keep track of the very last state from the stream
+        # --- Logging addition: Before astream loop ---
+        print(f"Task {task_id}: Starting/Resuming workflow. Initial/Current input state for graph: {{'current_stage': {current_input_state.get('current_stage')}, 'human_in_loop_needed': {current_input_state.get('human_in_loop_needed')}, 'current_verification_request_id': {current_input_state.get('current_verification_request', {}).get('data_id') if current_input_state.get('current_verification_request') else None}, 'human_feedback_approved': {current_input_state.get('human_feedback', {}).get('approved') if current_input_state.get('human_feedback') else None}}}")
 
         async for event in knowledge_nexus_graph.astream(current_input_state, config=config):
             if not event: continue
@@ -114,18 +116,27 @@ async def run_research_workflow_async(task_id: str, topic: str, initial_graph_in
             # Persist the full state after each node
             active_tasks[task_id]['graph_state'] = current_state_after_node
             active_tasks[task_id]['last_event_node'] = latest_node_name
+            # ---- MODIFICATION START: Store current_stage ----
+            current_stage_from_node = current_state_after_node.get('current_stage')
+            if current_stage_from_node:
+                active_tasks[task_id]['current_stage'] = current_stage_from_node
+            # ---- MODIFICATION END ----
 
-            print(f"Task {task_id}: Processed node '{latest_node_name}'.")
+            # --- Logging addition: Inside astream loop, after processing node ---
+            print(f"Task {task_id}: Node '{latest_node_name}' processed. State after node: {{'current_stage': {current_state_after_node.get('current_stage')}, 'human_in_loop_needed': {current_state_after_node.get('human_in_loop_needed')}, 'current_verification_request_id': {current_state_after_node.get('current_verification_request', {}).get('data_id') if current_state_after_node.get('current_verification_request') else None}, 'human_feedback_approved': {current_state_after_node.get('human_feedback', {}).get('approved') if current_state_after_node.get('human_feedback') else None}, 'error': {current_state_after_node.get('error_message')}}}")
+            # Original print statement follows, now enhanced by the one above.
+            print(f"Task {task_id}: Processed node '{latest_node_name}'. Current stage: {current_stage_from_node}")
 
             if current_state_after_node.get('error_message'):
-                active_tasks[task_id].update({"status": "error_in_workflow", "error_message": current_state_after_node['error_message']})
+                active_tasks[task_id].update({"status": "error_in_workflow", "error_message": current_state_after_node['error_message'], "current_stage": "failed"}) # Also set stage to failed
                 print(f"Task {task_id}: Error reported by workflow: {current_state_after_node['error_message']}")
                 return # Stop processing on error
 
             # Check if the workflow is pausing for human input
             if current_state_after_node.get('human_in_loop_needed') and \
                current_state_after_node.get('current_verification_request'):
-                print(f"Task {task_id}: Pausing for human input at node '{latest_node_name}'. Verification request for data ID: {current_state_after_node['current_verification_request']['data_id']}")
+                # --- Logging modification: Enhanced pausing print ---
+                print(f"Task {task_id}: Pausing for human input at node '{latest_node_name}'. Verification request for data ID: {current_state_after_node['current_verification_request']['data_id']}. Current stage: {current_state_after_node.get('current_stage')}")
                 active_tasks[task_id]['status'] = "awaiting_human_verification"
                 # Workflow effectively pauses here for this task_id.
                 # The current run_research_workflow_async will exit.
@@ -137,23 +148,28 @@ async def run_research_workflow_async(task_id: str, topic: str, initial_graph_in
         # This means the graph ran to an END node.
         if final_event_state:
              active_tasks[task_id].update({
-                "status": "completed",
+                "status": "completed", # This is the overall status
+                "current_stage": "completed", # Explicitly set current_stage in the update
                 # Use final_event_state which is the state after the last node that led to END
                 "final_document_preview": final_event_state.get('final_document', '')[:250] + "...",
                 "final_graph_state": final_event_state
             })
-             print(f"Task {task_id}: Workflow completed successfully.")
+             active_tasks[task_id]['current_stage'] = "completed" # <--- Explicitly ensure it's set
+             # Ensure the print statement reflects the update made to active_tasks[task_id]['current_stage']
+             print(f"Task {task_id}: Workflow completed successfully. Final stage set to: {active_tasks[task_id]['current_stage']}")
         else:
             # This case might occur if the stream somehow ends without any event after resumption,
             # or if initial_graph_input was already a terminal state.
             if active_tasks[task_id]["status"] == "running": # If it was running and just finished without specific end state
-                 active_tasks[task_id].update({"status": "unknown_completion", "error_message": "Workflow stream ended without a definitive final state but was running."})
-                 print(f"Task {task_id}: Workflow stream ended without explicit completion or error, after being in 'running' state.")
+                 active_tasks[task_id].update({"status": "unknown_completion", "current_stage": "unknown", "error_message": "Workflow stream ended without a definitive final state but was running."})
+                 # --- Logging modification: Enhanced unknown completion print ---
+                 print(f"Task {task_id}: Workflow stream ended without explicit completion or error, after being in 'running' state. Last known stage: {active_tasks[task_id].get('current_stage')}")
 
 
     except Exception as e:
-        print(f"Task {task_id}: Critical error during workflow execution: {e}", exc_info=True)
-        active_tasks[task_id].update({"status": "failed", "error_message": str(e)})
+        # --- Logging modification: Enhanced critical error print ---
+        print(f"Task {task_id}: Critical error during workflow execution: {e}. Last known stage: {active_tasks[task_id].get('current_stage')}", exc_info=True)
+        active_tasks[task_id].update({"status": "failed", "current_stage": "failed", "error_message": str(e)})
 
 # --- API Endpoints ---
 @app.get("/health", summary="Health Check", tags=["General"])
@@ -183,7 +199,8 @@ async def start_research_task_endpoint(request: ResearchRequest, background_task
     )
 
     active_tasks[task_id] = {
-        "task_id": task_id, "topic": request.topic, "status": "queued",
+        "task_id": task_id, "topic": request.topic, "status": "queued", # Overall status
+        "current_stage": "queued", # Initial stage
         "graph_state": initial_graph_input, # Store the whole initial state
         "resuming_after_verification": False
     }
@@ -191,7 +208,7 @@ async def start_research_task_endpoint(request: ResearchRequest, background_task
     background_tasks.add_task(run_research_workflow_async, task_id, request.topic, initial_graph_input)
 
     return ResearchStatus(
-        task_id=task_id, status="queued",
+        task_id=task_id, status="queued", # This will be updated by get_task_status_endpoint using current_stage
         message=f"Research task for topic '{request.topic}' has been queued.",
         timestamp=datetime.utcnow()
     )
@@ -204,51 +221,83 @@ async def get_task_status_endpoint(task_id: str):
 
     # current_graph_state is the state of the workflow, an instance of KnowledgeNexusState (as a dict)
     current_graph_state = task.get("graph_state", {})
-    status = task.get("status", "unknown")
+    # ---- MODIFICATION START: Use current_stage for status, progress, and message ----
+    # The overall 'status' from active_tasks (like "running", "completed", "failed", "awaiting_human_verification")
+    # is still useful for high-level flow control, but current_stage is for user-facing status.
+    task_overall_status = task.get("status", "unknown") # e.g. "running", "completed", "awaiting_human_verification"
+    current_stage_from_task = task.get("current_stage", "unknown") # e.g. "researching", "verifying"
+
     verification_req_data = None # This will hold DataVerificationRequest model
 
-    if status == "awaiting_human_verification" and \
+    if task_overall_status == "awaiting_human_verification" and \
        current_graph_state.get('human_in_loop_needed') and \
        current_graph_state.get('current_verification_request'):
-        # current_verification_request from graph_state should be a dict
         raw_verification_request = current_graph_state['current_verification_request']
         try:
-            # Attempt to parse it into the Pydantic model for ResearchStatus
             if isinstance(raw_verification_request, dict):
                  verification_req_data = DataVerificationRequest(**raw_verification_request)
-            elif isinstance(raw_verification_request, DataVerificationRequest): # If already a model instance
+            elif isinstance(raw_verification_request, DataVerificationRequest):
                  verification_req_data = raw_verification_request
-            # Else, it might be None or an incompatible type, verification_req_data remains None
-        except Exception as e: # Broad exception for parsing issues
+        except Exception as e:
             print(f"Error parsing current_verification_request for task {task_id}: {e}")
-            # verification_req_data remains None
 
-    # Placeholder for progress calculation
-    current_progress = 0.0
-    if status == "completed": current_progress = 1.0
-    elif status == "running": current_progress = 0.5 # Generic "in progress"
-    elif status == "awaiting_human_verification": current_progress = 0.4 # Example, can be more granular
-    elif status == "queued": current_progress = 0.1
-    elif status == "resuming_after_verification": current_progress = 0.45 # Between await and running
+    progress_map = {
+        "queued": 0.05,
+        "researching": 0.20,
+        "verifying": 0.35,
+        "awaiting_human_verification": 0.40, # This is a task_overall_status, but also a valid stage
+        "processing_human_feedback": 0.45,
+        "synthesizing": 0.60,
+        "detecting_conflicts": 0.75,
+        "generating_document": 0.90,
+        "completed": 1.0,
+        "failed": 0.0,
+        "unknown": 0.0
+    }
+    # If current_stage_from_task is "awaiting_human_verification", use that.
+    # Otherwise, if task_overall_status is "awaiting_human_verification", that takes precedence for progress and message.
+    effective_stage_for_status = current_stage_from_task
+    if task_overall_status == "awaiting_human_verification":
+        effective_stage_for_status = "awaiting_human_verification"
 
-    topic = task.get('topic', 'N/A') # Default topic if not found
-    error_message = task.get("error_message")
 
-    if status == "completed":
-        message = f"Research completed for topic: {topic}"
-    elif status in ["failed", "error_in_workflow"]:
-        message = error_message or f"Research failed for topic: {topic}. No specific error message."
-    else:
-        message = f"Current status for topic: {topic}"
+    current_progress = progress_map.get(effective_stage_for_status, 0.0)
+
+    topic = task.get('topic', 'N/A')
+    error_message_from_task = task.get("error_message")
+    message = f"Task for topic '{topic}' is currently {effective_stage_for_status}."
+
+    if effective_stage_for_status == "queued":
+        message = f"Research task for topic '{topic}' is queued."
+    elif effective_stage_for_status == "researching":
+        message = f"Researching information for topic: {topic}."
+    elif effective_stage_for_status == "verifying":
+        message = f"Verifying collected data for topic: {topic}."
+    elif effective_stage_for_status == "awaiting_human_verification":
+        message = f"Awaiting human verification for a data point related to topic: {topic}."
+    elif effective_stage_for_status == "processing_human_feedback":
+        message = f"Processing human feedback for topic: {topic}."
+    elif effective_stage_for_status == "synthesizing":
+        message = f"Synthesizing research data for topic: {topic}."
+    elif effective_stage_for_status == "detecting_conflicts":
+        message = f"Detecting conflicts in research data for topic: {topic}."
+    elif effective_stage_for_status == "generating_document":
+        message = f"Generating final document for topic: {topic}."
+    elif effective_stage_for_status == "completed":
+        message = f"Research completed successfully for topic: {topic}."
+    elif effective_stage_for_status == "failed":
+        message = error_message_from_task or f"Research failed for topic: {topic}."
+    # else, the generic message `Task for topic '{topic}' is currently {effective_stage_for_status}.` will be used.
 
     return ResearchStatus(
         task_id=task_id,
-        status=status,
+        status=effective_stage_for_status, # Use the granular stage here
         message=message,
         progress=current_progress,
-        timestamp=datetime.utcnow(), # Consider storing task creation/update timestamp in active_tasks
-        verification_request=verification_req_data # This is now correctly populated
+        timestamp=datetime.utcnow(),
+        verification_request=verification_req_data
     )
+    # ---- MODIFICATION END ----
 
 @app.post("/submit-verification/{task_id}", status_code=200, summary="Submit Human Verification for a Task", tags=["Research"])
 async def submit_human_verification_endpoint(task_id: str, approval_input: HumanApproval, background_tasks: BackgroundTasks):

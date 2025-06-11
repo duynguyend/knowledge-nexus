@@ -58,6 +58,7 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY") # Keep this for fallback or other u
 class KnowledgeNexusState(TypedDict): # type: ignore
     topic: str
     task_id: str  # Unique ID for the entire research task
+    current_stage: str # Added field to track current human-readable stage
     research_data: List[Dict[str, Any]]  # Raw data from internet research
     verified_data: List[Dict[str, Any]]  # Verified data
     synthesized_content: str
@@ -73,7 +74,9 @@ class KnowledgeNexusState(TypedDict): # type: ignore
 # 2. Implement Agent Nodes
 # Updated research_node to include chroma_service and use it
 def research_node(state: KnowledgeNexusState, chroma_service: ChromaService) -> KnowledgeNexusState:
-    print(f"\n--- Agent: Researcher ---")
+    print(f"--- Entering RESEARCH_NODE --- Task ID: {state.get('task_id')}, Current Stage: {state.get('current_stage')}")
+    state['current_stage'] = "researching"
+    print(f"\n--- Agent: Researcher (Stage: {state['current_stage']}) ---")
     topic = state.get('topic')
     task_id = state.get('task_id') # Get task_id for ChromaDB collection name
 
@@ -187,7 +190,9 @@ def research_node(state: KnowledgeNexusState, chroma_service: ChromaService) -> 
 
 # Updated verify_node to include chroma_service in signature
 def verify_node(state: KnowledgeNexusState, chroma_service: ChromaService) -> KnowledgeNexusState:
-    print(f"\n--- Agent: Verifier ---")
+    print(f"--- Entering VERIFY_NODE --- Task ID: {state.get('task_id')}, Current Stage: {state.get('current_stage')}, Research data items: {len(state.get('research_data', []))}")
+    state['current_stage'] = "verifying"
+    print(f"\n--- Agent: Verifier (Stage: {state['current_stage']}) ---")
     if chroma_service:
         print("Verifier: ChromaService available.")
     else:
@@ -240,7 +245,9 @@ def verify_node(state: KnowledgeNexusState, chroma_service: ChromaService) -> Kn
     return state
 
 def synthesize_node(state: KnowledgeNexusState, llm: Optional[BaseChatModel]) -> KnowledgeNexusState:
-    print(f"\n--- Agent: Synthesizer ---")
+    print(f"--- Entering SYNTHESIZE_NODE --- Task ID: {state.get('task_id')}, Current Stage: {state.get('current_stage')}, Verified data items: {len(state.get('verified_data', []))}")
+    state['current_stage'] = "synthesizing"
+    print(f"\n--- Agent: Synthesizer (Stage: {state['current_stage']}) ---")
     state['error_message'] = None # Clear previous errors
     verified_data = state.get('verified_data', [])
 
@@ -295,7 +302,9 @@ def synthesize_node(state: KnowledgeNexusState, llm: Optional[BaseChatModel]) ->
     return state
 
 def conflict_detection_node(state: KnowledgeNexusState) -> KnowledgeNexusState:
-    print(f"\n--- Agent: Conflict Detector ---")
+    print(f"--- Entering CONFLICT_DETECTION_NODE --- Task ID: {state.get('task_id')}, Current Stage: {state.get('current_stage')}")
+    state['current_stage'] = "detecting_conflicts"
+    print(f"\n--- Agent: Conflict Detector (Stage: {state['current_stage']}) ---")
     print("Checking for conflicts...")
     # Placeholder: No conflicts detected for now
     state['detected_conflicts'] = []
@@ -303,7 +312,9 @@ def conflict_detection_node(state: KnowledgeNexusState) -> KnowledgeNexusState:
     return state
 
 def document_generation_node(state: KnowledgeNexusState, llm: Optional[BaseChatModel]) -> KnowledgeNexusState:
-    print(f"\n--- Agent: Document Generator ---")
+    print(f"--- Entering DOCUMENT_GENERATION_NODE --- Task ID: {state.get('task_id')}, Current Stage: {state.get('current_stage')}, Synthesized content length: {len(state.get('synthesized_content', ''))}")
+    state['current_stage'] = "generating_document"
+    print(f"\n--- Agent: Document Generator (Stage: {state['current_stage']}) ---")
     state['error_message'] = None # Clear previous errors
     synthesized_content = state.get('synthesized_content', "")
 
@@ -332,11 +343,13 @@ def document_generation_node(state: KnowledgeNexusState, llm: Optional[BaseChatM
     return state
 
 def await_human_input_node(state: KnowledgeNexusState) -> KnowledgeNexusState:
-    print(f"\n--- Workflow: Awaiting Human Input ---")
+    print(f"--- Entering AWAIT_HUMAN_INPUT_NODE --- Task ID: {state.get('task_id')}, Current Stage: {state.get('current_stage')}, Human in loop needed: {state.get('human_in_loop_needed')}, Feedback provided: {state.get('human_feedback') is not None}")
+    print(f"\n--- Workflow: Awaiting Human Input ---") # Original print
     feedback = state.get('human_feedback')
 
     if feedback:
-        print(f"Human feedback received for data ID: {feedback['data_id']}. Approved: {feedback['approved']}")
+        state['current_stage'] = "processing_human_feedback" # Stage during feedback processing
+        print(f"Human feedback received (Stage: {state['current_stage']}) for data ID: {feedback['data_id']}. Approved: {feedback['approved']}")
         # Process the feedback
         # This is a simplified example. You'd need to find the specific item in verified_data
         # or research_data that corresponds to feedback['data_id'] and update it.
@@ -377,7 +390,8 @@ def await_human_input_node(state: KnowledgeNexusState) -> KnowledgeNexusState:
     elif state.get('human_in_loop_needed'):
         # This case means the node is entered because human_in_loop_needed was true,
         # but no feedback is yet available in the state. This is the "pause" state.
-        print(f"Task '{state['task_id']}' is paused, waiting for human verification on data ID: {state.get('current_verification_request', {}).get('data_id')}")
+        state['current_stage'] = "awaiting_human_verification"
+        print(f"Task '{state['task_id']}' is paused (Stage: {state['current_stage']}), waiting for human verification on data ID: {state.get('current_verification_request', {}).get('data_id')}")
         # The graph will effectively pause here if this node doesn't transition out.
         # An external mechanism (API endpoint) will need to inject 'human_feedback' into the state
         # and re-trigger the graph execution from this point.
@@ -392,7 +406,8 @@ def await_human_input_node(state: KnowledgeNexusState) -> KnowledgeNexusState:
 
 # 3. Implement Conditional Edges
 def should_request_human_verification(state: KnowledgeNexusState) -> str:
-    print(f"\n--- Workflow: Conditional Edge ---")
+    print(f"--- Conditional Edge: SHOULD_REQUEST_HUMAN_VERIFICATION --- Task ID: {state.get('task_id')}, Current Stage: {state.get('current_stage')}, Human in loop needed: {state.get('human_in_loop_needed')}, Verification request active: {state.get('current_verification_request') is not None}")
+    print(f"\n--- Workflow: Conditional Edge ---") # Existing print
     if state.get('human_in_loop_needed') and state.get('current_verification_request'):
         print("Decision: Human verification IS needed.")
         return "human_verification_needed"
@@ -525,7 +540,8 @@ if __name__ == '__main__':
         "current_verification_request": None,
         "messages": [],
         "error_message": None,
-        "human_feedback": None # Initialize new state field
+        "human_feedback": None, # Initialize new state field
+        "current_stage": "queued" # Initialize current_stage
     }
 
     # To test the human input path, you would need to:
