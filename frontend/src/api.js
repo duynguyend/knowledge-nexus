@@ -68,6 +68,33 @@ export const startResearchTopic = async (topic) => {
 };
 
 /**
+ * Fetches the results of a specific research task.
+ * @param {string} taskId - The ID of the task.
+ * @returns {Promise<Object>} A promise that resolves to the task results data.
+ * @throws {Error} If the request fails.
+ */
+export const getTaskResults = async (taskId) => {
+  if (!taskId) {
+    throw new Error('Task ID cannot be empty for getTaskResults.');
+  }
+  try {
+    const response = await axios.get(`${API_BASE_URL}/results/${taskId}`);
+    console.log(`API call /results/${taskId} successful, response data:`, response.data);
+    return response.data; // Expected: { document_content: "...", ... }
+  } catch (error) {
+    console.error(`Error fetching results for task ${taskId}:`, error.message);
+    if (error.response) {
+      console.error('Error response data (getTaskResults):', error.response.data);
+      throw new Error(error.response.data.detail || `Failed to fetch results (status ${error.response.status})`);
+    } else if (error.request) {
+      throw new Error('No response from server while fetching task results.');
+    } else {
+      throw new Error(`An unexpected error occurred while fetching task results: ${error.message}`);
+    }
+  }
+};
+
+/**
  * (Placeholder) Initiates document generation for a task with specified options.
  * @param {string} taskId - The ID of the task.
  * @param {Object} exportOptions - Options for document generation.

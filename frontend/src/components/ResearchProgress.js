@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { getTaskStatus, submitVerification } from '../api';
 import './ResearchProgress.css';
 
 const DEFAULT_POLL_INTERVAL = 5000; // 5 seconds
 
 function ResearchProgress({ taskId }) {
+  const navigate = useNavigate();
   const [statusDetails, setStatusDetails] = useState(null);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false); // For individual actions like submitting verification
@@ -185,7 +187,13 @@ function ResearchProgress({ taskId }) {
         <div className="completion-message-block card">
           <h3>Research Complete</h3>
           <p>{message || "The research task has been successfully completed."}</p>
-          <button disabled className="placeholder-button">View Results (Not Implemented Yet)</button>
+          <button
+            onClick={() => navigate(`/results/${statusDetails.task_id}`)}
+            disabled={isLoading || status !== 'completed'}
+            className="view-results-button"
+          >
+            View Results
+          </button>
         </div>
       )}
       {/* Show regular message only if not completed, to avoid redundancy with the block above */}
