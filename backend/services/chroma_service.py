@@ -11,9 +11,9 @@ logger = logging.getLogger(__name__)
 
 
 class AzureOpenAIEmbeddingFunction(EmbeddingFunction):
-    def __init__(self, api_key: str, azure_endpoint: str, api_version: str, azure_deployment_name: str):
+    def __init__(self, embedding_api_key: str, azure_endpoint: str, api_version: str, azure_deployment_name: str):
         self._client = AzureOpenAI(
-            api_key=api_key,
+            api_key=embedding_api_key,
             azure_endpoint=azure_endpoint,
             api_version=api_version,
         )
@@ -47,17 +47,17 @@ class ChromaService:
         try:
             self.client = chromadb.PersistentClient(path=persist_directory)
 
-            azure_api_key = os.getenv("AZURE_OPENAI_API_KEY")
+            azure_embedding_api_key = os.getenv("AZURE_OPENAI_EMBEDDING_API_KEY")
             azure_endpoint = os.getenv("AZURE_OPENAI_ENDPOINT")
             azure_api_version = os.getenv("OPENAI_API_VERSION") # or AZURE_OPENAI_API_VERSION
             azure_embedding_deployment = os.getenv("AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME")
 
-            if not all([azure_api_key, azure_endpoint, azure_api_version, azure_embedding_deployment]):
-                logger.error("Azure OpenAI environment variables are not fully set.")
-                raise ValueError("Missing one or more Azure OpenAI environment variables.")
+            if not all([azure_embedding_api_key, azure_endpoint, azure_api_version, azure_embedding_deployment]):
+                logger.error("Azure OpenAI embedding environment variables are not fully set.")
+                raise ValueError("Missing one or more Azure OpenAI embedding environment variables.")
 
             self.embedding_function = AzureOpenAIEmbeddingFunction(
-                api_key=azure_api_key,
+                embedding_api_key=azure_embedding_api_key,
                 azure_endpoint=azure_endpoint,
                 api_version=azure_api_version,
                 azure_deployment_name=azure_embedding_deployment
@@ -186,7 +186,7 @@ if __name__ == '__main__':
     # Initialize service (will create ./chroma_db_store if it doesn't exist)
     # This will now require Azure OpenAI environment variables to be set.
     # For local testing, ensure you have a .env file with:
-    # AZURE_OPENAI_API_KEY="your_key"
+    # AZURE_OPENAI_EMBEDDING_API_KEY="your_embedding_key"
     # AZURE_OPENAI_ENDPOINT="your_endpoint"
     # OPENAI_API_VERSION="your_api_version"
     # AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME="your_deployment_name"
@@ -194,7 +194,7 @@ if __name__ == '__main__':
     # load_dotenv()
 
     logger.info("Attempting to initialize ChromaService with Azure OpenAI embeddings.")
-    logger.info("Ensure Azure OpenAI environment variables (AZURE_OPENAI_API_KEY, AZURE_OPENAI_ENDPOINT, OPENAI_API_VERSION, AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME) are set.")
+    logger.info("Ensure Azure OpenAI embedding environment variables (AZURE_OPENAI_EMBEDDING_API_KEY, AZURE_OPENAI_ENDPOINT, OPENAI_API_VERSION, AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME) are set.")
 
     try:
         chroma_service = ChromaService(persist_directory="./test_chroma_db")
