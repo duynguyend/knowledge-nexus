@@ -1,0 +1,75 @@
+/* CustomizeOutput.css */
+.customize-output-container {
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 2rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+}
+
+.customize-output-container header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.customization-section {
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  border: 1px solid #eee;
+  border-radius: 6px;
+  background-color: #fff;
+}
+
+.customization-section h2 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+  color: #333;
+}
+
+.template-options label,
+.citation-style-options label,
+.sections-to-include-options label {
+  display: block;
+  margin-bottom: 0.75rem;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.template-options input[type="radio"],
+.citation-style-options input[type="radio"],
+.sections-to-include-options input[type="checkbox"] {
+  margin-right: 0.5rem;
+}
+
+.generate-button-container {
+  text-align: center;
+  margin-top: 2rem;
+}
+
+.generate-document-button {
+  padding: 0.8rem 1.5rem;
+  font-size: 1.1rem;
+  color: #fff;
+  background-color: #007bff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.generate-document-button:hover {
+  background-color: #0056b3;
+}
+
+.generate-document-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.error-message {
+  color: red;
+  text-align: center;
+  margin-top: 1rem;
+}
