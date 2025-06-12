@@ -1,139 +1,449 @@
-.export-options-container {
-  max-width: 800px;
-  margin: 2rem auto;
-  padding: 2rem;
-  font-family: Arial, sans-serif;
-  background-color: #fff;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+/* ExportOptions.css */
+
+/* Global Variables (prefixed with eo-) */
+:root {
+  --eo-color-bg: #f9fafb; /* bg-gray-50 (body) */
+  --eo-color-header-bg: #ffffff; /* bg-white (header, footer) */
+  --eo-color-card-bg: #ffffff; /* bg-white (main form card) */
+
+  --eo-color-text-primary: #1f2937; /* text-gray-800 (header title, main title) */
+  --eo-color-text-secondary: #4b5563; /* text-gray-700 (form labels, some body text) */
+  --eo-color-text-muted: #6b7280;   /* text-gray-600 (nav links, some subtitles) */
+  --eo-color-text-placeholder: #9ca3af; /* placeholder-gray-400 / text-gray-400 */
+  --eo-color-text-icon: #6b7280;      /* text-gray-500 for search icon */
+  --eo-color-text-white: #ffffff;
+
+  --eo-color-border-light: #e5e7eb; /* border-gray-200 */
+  --eo-color-border-input: #d1d5db; /* border-gray-300 */
+
+  --eo-color-primary: #2563eb;      /* text-blue-600 (active nav, button bg) */
+  --eo-color-primary-hover: #1d4ed8;   /* hover:bg-blue-700 */
+  --eo-color-primary-focus-ring: #3b82f6; /* focus:ring-blue-500 */
+
+  --eo-color-button-secondary-bg: #ffffff;
+  --eo-color-button-secondary-text: #374151; /* text-gray-700 for non-primary buttons */
+  --eo-color-button-secondary-hover-bg: #f9fafb; /* hover:bg-gray-50 */
+
+  --eo-font-sans: 'Inter', "Noto Sans", sans-serif;
+
+  --eo-spacing-1: 0.25rem;
+  --eo-spacing-1_5: 0.375rem; /* py-1.5 for small buttons */
+  --eo-spacing-2: 0.5rem;
+  --eo-spacing-3: 0.75rem;  /* px-3 for small buttons, search icon pl */
+  --eo-spacing-4: 1rem;     /* px-4, py-2 for buttons, gaps */
+  --eo-spacing-6: 1.5rem;   /* p-6 */
+  --eo-spacing-8: 2rem;     /* gap-8 header, py-8 main, mb-8 */
+  --eo-spacing-10: 2.5rem;  /* px-10 header, p-10 form card */
+  --eo-spacing-16: 4rem;    /* xl:px-16 */
+  --eo-spacing-24: 6rem;    /* xl:px-24 */
+
+  --eo-text-xs: 0.75rem;
+  --eo-text-sm: 0.875rem;
+  --eo-text-base: 1rem;
+  --eo-text-lg: 1.125rem;
+  --eo-text-xl: 1.25rem;
+  --eo-text-3xl: 1.875rem;
+  --eo-text-4xl: 2.25rem;
+
+  --eo-font-normal: 400;
+  --eo-font-medium: 500;
+  --eo-font-semibold: 600;
+  --eo-font-bold: 700;
+
+  --eo-leading-tight: 1.25;
+  --eo-leading-normal: 1.5;
+
+  --eo-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --eo-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+
+  --eo-rounded-lg: 0.5rem;
+  --eo-rounded-md: 0.375rem;
+  --eo-rounded-full: 9999px;
 }
 
-.export-header {
-  text-align: center;
-  margin-bottom: 2rem;
+.eo-page-container {
+  font-family: var(--eo-font-sans);
+  background-color: var(--eo-color-bg);
+  color: var(--eo-color-text-secondary);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
-.export-header h1 {
-  font-size: 2rem;
-  color: #333;
-}
-
-.export-header p {
-  font-size: 1rem;
-  color: #666;
-}
-
-.export-form .form-section {
-  margin-bottom: 2rem;
-  padding: 1.5rem;
-  border: 1px solid #e0e0e0;
-  border-radius: 6px;
-  background-color: #f9f9f9;
-}
-
-.export-form legend {
-  font-size: 1.2rem;
-  font-weight: bold;
-  color: #007bff;
-  padding: 0 0.5rem;
-  margin-left: 1rem; /* Align with padding of fieldset */
-}
-
-.export-form .form-group {
-  margin-bottom: 1rem;
-}
-
-.export-form label {
-  display: block;
-  margin-bottom: 0.5rem;
-  color: #555;
-  font-weight: normal; /* Less emphasis than legend */
-}
-
-.export-form select,
-.export-form input[type="text"] /* If you add any text inputs */ {
+.eo-layout-container {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
   width: 100%;
-  padding: 0.6rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 0.95rem;
-  box-sizing: border-box; /* Important for width 100% */
 }
 
-.export-form .checkbox-group label {
-  display: block; /* Each checkbox on its own line for clarity */
-  margin-bottom: 0.5rem;
-  font-weight: normal;
-}
-.export-form .checkbox-group input[type="checkbox"] {
-  margin-right: 0.5rem;
-  vertical-align: middle;
+/* Header Styles */
+.eo-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  white-space: nowrap;
+  border-bottom: 1px solid var(--eo-color-border-light);
+  padding: var(--eo-spacing-3) var(--eo-spacing-10); /* py-3 px-10 */
+  background-color: var(--eo-color-header-bg);
+  box-shadow: var(--eo-shadow-sm);
 }
 
-.export-form .sections-checkboxes {
-  max-height: 150px; /* Example height */
+.eo-header-left {
+  display: flex;
+  align-items: center;
+  gap: var(--eo-spacing-8);
+}
+
+.eo-header-logo-title {
+  display: flex;
+  align-items: center;
+  gap: var(--eo-spacing-3);
+}
+.eo-logo-svg-container {
+  width: 1.5rem; /* size-6 */
+  height: 1.5rem;
+  color: var(--eo-color-primary);
+}
+.eo-logo-svg-container svg {
+  width: 100%;
+  height: 100%;
+}
+.eo-header-title-text {
+  color: var(--eo-color-text-primary);
+  font-size: var(--eo-text-xl);
+  font-weight: var(--eo-font-semibold);
+  line-height: var(--eo-leading-tight);
+}
+
+.eo-nav {
+  display: flex;
+  align-items: center;
+  gap: var(--eo-spacing-6);
+}
+.eo-nav-link {
+  color: var(--eo-color-text-muted);
+  font-size: var(--eo-text-sm);
+  font-weight: var(--eo-font-medium);
+  line-height: var(--eo-leading-normal);
+  text-decoration: none;
+  transition: color 0.15s ease-in-out;
+}
+.eo-nav-link:hover {
+  color: var(--eo-color-primary);
+}
+.eo-nav-link.eo-nav-link-active {
+  color: var(--eo-color-primary);
+  font-weight: var(--eo-font-semibold);
+}
+
+.eo-header-right {
+  display: flex;
+  flex: 1; /* Added to push to right */
+  justify-content: flex-end;
+  align-items: center;
+  gap: var(--eo-spacing-4);
+}
+
+.eo-search-label { /* flex flex-col min-w-40 !h-10 max-w-xs */
+  display: flex; /* Changed from flex-col to align items in one row */
+  align-items: center; /* Align icon and input */
+  min-width: 10rem; /* min-w-40 */
+  height: 2.5rem; /* h-10 */
+  max-width: 20rem; /* max-w-xs */
+  border: 1px solid var(--eo-color-border-input);
+  border-radius: var(--eo-rounded-lg);
+  background-color: var(--eo-color-header-bg); /* bg-gray-50 for icon part, white for input */
+}
+.eo-search-icon-wrapper { /* text-gray-400 flex border ... items-center justify-center pl-3 rounded-l-lg border-r-0 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-left: var(--eo-spacing-3);
+  /* border-right: none; (Handled by input's border-left:none) */
+  background-color: #f9fafb; /* bg-gray-50 */
+  height: 100%;
+  border-top-left-radius: var(--eo-rounded-lg);
+  border-bottom-left-radius: var(--eo-rounded-lg);
+}
+.eo-search-icon { /* material-icons text-gray-500 */
+  color: var(--eo-color-text-icon);
+  font-size: 20px; /* style="font-size: 20px;" */
+}
+.eo-search-input { /* form-input flex w-full ... px-3 rounded-l-none border-l-0 pl-2 ... */
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  border: none; /* Border is on parent .eo-search-label */
+  border-top-right-radius: var(--eo-rounded-lg);
+  border-bottom-right-radius: var(--eo-rounded-lg);
+  padding-left: var(--eo-spacing-2);
+  padding-right: var(--eo-spacing-3);
+  font-size: var(--eo-text-sm);
+  color: var(--eo-color-text-secondary);
+  background-color: var(--eo-color-header-bg);
+}
+.eo-search-input::placeholder {
+  color: var(--eo-color-text-placeholder);
+}
+.eo-search-input:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--eo-color-primary-focus-ring); /* Simplified focus ring */
+}
+
+.eo-new-document-button { /* inline-flex items-center ... bg-blue-600 px-4 py-2 ... */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--eo-rounded-lg);
+  border: 1px solid transparent; /* border-transparent */
+  background-color: var(--eo-color-primary);
+  padding: var(--eo-spacing-2) var(--eo-spacing-4); /* py-2 px-4 */
+  font-size: var(--eo-text-sm);
+  font-weight: var(--eo-font-medium);
+  color: var(--eo-color-text-white);
+  box-shadow: var(--eo-shadow-sm);
+  transition: background-color 0.15s ease-in-out;
+  cursor: pointer;
+}
+.eo-new-document-button:hover {
+  background-color: var(--eo-color-primary-hover);
+}
+.eo-new-document-button:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--eo-color-header-bg), 0 0 0 4px var(--eo-color-primary-focus-ring); /* focus:ring-offset-2 */
+}
+
+.eo-profile-pic {
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  border-radius: var(--eo-rounded-full);
+  width: 2.5rem; /* size-10 */
+  height: 2.5rem;
+  border: 1px solid var(--eo-color-border-input);
+}
+
+/* Main Content Styles */
+.eo-main-content { /* flex-1 py-8 px-4 md:px-10 lg:px-16 xl:px-24 */
+  flex: 1;
+  padding: var(--eo-spacing-8) var(--eo-spacing-4);
+}
+@media (min-width: 768px) { /* md:px-10 */
+  .eo-main-content { padding-left: var(--eo-spacing-10); padding-right: var(--eo-spacing-10); }
+}
+@media (min-width: 1024px) { /* lg:px-16 */
+  .eo-main-content { padding-left: var(--eo-spacing-16); padding-right: var(--eo-spacing-16); }
+}
+@media (min-width: 1280px) { /* xl:px-24 */
+  .eo-main-content { padding-left: var(--eo-spacing-24); padding-right: var(--eo-spacing-24); }
+}
+
+.eo-form-container-wrapper { /* max-w-4xl mx-auto */
+  max-width: 56rem; /* 4xl is 896px */
+  margin-left: auto;
+  margin-right: auto;
+}
+.eo-form-card { /* bg-white shadow-xl rounded-lg overflow-hidden */
+  background-color: var(--eo-color-card-bg);
+  box-shadow: var(--eo-shadow-xl);
+  border-radius: var(--eo-rounded-lg);
+  overflow: hidden; /* For potential internal content clipping if needed */
+}
+.eo-form-header-section { /* p-6 sm:p-8 md:p-10 ... mb-8 pb-6 border-b */
+  padding: var(--eo-spacing-6); /* Start with base padding */
+  margin-bottom: var(--eo-spacing-8); /* Spacing before form elements */
+  /* border-bottom: 1px solid var(--eo-color-border-light); */ /* Design shows this under main title block, not form title */
+  text-align: center; /* Centering the title and subtitle for the form */
+}
+@media (min-width: 640px) { /* sm:p-8 */
+  .eo-form-header-section { padding: var(--eo-spacing-8); }
+}
+@media (min-width: 768px) { /* md:p-10 */
+  .eo-form-header-section { padding: var(--eo-spacing-10); padding-bottom: var(--eo-spacing-6); } /* Keep bottom padding smaller */
+}
+
+.eo-main-title-text { /* text-gray-800 text-3xl md:text-4xl font-bold ... */
+  color: var(--eo-color-text-primary);
+  font-size: var(--eo-text-3xl);
+  font-weight: var(--eo-font-bold);
+  line-height: var(--eo-leading-tight);
+  letter-spacing: -0.025em; /* tracking-tight */
+  margin-bottom: var(--eo-spacing-2); /* Space between title and subtitle */
+}
+@media (min-width: 768px) {
+  .eo-main-title-text { font-size: var(--eo-text-4xl); }
+}
+.eo-subtitle-text {
+  color: var(--eo-color-text-muted);
+  font-size: var(--eo-text-base);
+}
+
+/* Form Styles (adapting existing structure) */
+.eo-export-form {
+  padding: 0 var(--eo-spacing-6) var(--eo-spacing-6); /* Add padding around form elements */
+}
+@media (min-width: 768px) {
+  .eo-export-form { padding: 0 var(--eo-spacing-10) var(--eo-spacing-10); }
+}
+
+.eo-form-section {
+  margin-bottom: var(--eo-spacing-6);
+  padding: var(--eo-spacing-4);
+  border: 1px solid var(--eo-color-border-light);
+  border-radius: var(--eo-rounded-md);
+  background-color: var(--eo-color-bg); /* Light background for sections */
+}
+.eo-legend {
+  font-size: var(--eo-text-lg);
+  font-weight: var(--eo-font-semibold);
+  color: var(--eo-color-text-primary);
+  padding: 0 var(--eo-spacing-2);
+  margin-left: var(--eo-spacing-2);
+}
+.eo-form-group {
+  margin-bottom: var(--eo-spacing-4);
+}
+.eo-form-group:last-child {
+  margin-bottom: 0;
+}
+.eo-label {
+  display: block;
+  margin-bottom: var(--eo-spacing-2);
+  color: var(--eo-color-text-secondary);
+  font-weight: var(--eo-font-medium);
+  font-size: var(--eo-text-sm);
+}
+.eo-select {
+  width: 100%;
+  padding: var(--eo-spacing-2) var(--eo-spacing-3);
+  border: 1px solid var(--eo-color-border-input);
+  border-radius: var(--eo-rounded-md);
+  font-size: var(--eo-text-base);
+  box-sizing: border-box;
+  background-color: var(--eo-color-card-bg);
+}
+.eo-select:focus {
+  border-color: var(--eo-color-primary-focus-ring);
+  box-shadow: 0 0 0 1px var(--eo-color-primary-focus-ring);
+  outline: none;
+}
+
+.eo-checkbox-group {
+  /* Group styling if needed, e.g., for multiple checkboxes in a row */
+}
+.eo-checkbox-label-inline, .eo-checkbox-label-block {
+  display: flex; /* Use flex for alignment */
+  align-items: center;
+  margin-bottom: var(--eo-spacing-2);
+  font-weight: var(--eo-font-normal);
+  color: var(--eo-color-text-secondary);
+  font-size: var(--eo-text-sm);
+  cursor: pointer;
+}
+.eo-checkbox-label-block { /* For sections list where each is on its own line */
+    /* No specific change from inline if only one per line, but can be used for structure */
+}
+.eo-checkbox {
+  margin-right: var(--eo-spacing-2);
+  height: 1rem; /* h-4 w-4 equivalent */
+  width: 1rem;
+  border-radius: 0.25rem; /* rounded */
+  border: 1px solid var(--eo-color-border-input);
+}
+.eo-checkbox:checked {
+  background-color: var(--eo-color-primary);
+  border-color: var(--eo-color-primary);
+  /* For custom tick, would need more complex styling or SVG background */
+}
+.eo-sections-checkboxes {
+  max-height: 150px;
   overflow-y: auto;
-  border: 1px solid #eee;
-  padding: 0.5rem;
-  background-color: #fff;
+  border: 1px solid var(--eo-color-border-light);
+  padding: var(--eo-spacing-2);
+  background-color: var(--eo-color-card-bg);
+  border-radius: var(--eo-rounded-md);
 }
 
-
-.generate-doc-button {
+.eo-generate-doc-button {
   display: block;
   width: 100%;
-  padding: 0.8rem 1.5rem;
-  font-size: 1.1rem;
-  color: #fff;
-  background-color: #28a745; /* Green for generate */
+  padding: var(--eo-spacing-3) var(--eo-spacing-4);
+  font-size: var(--eo-text-base);
+  font-weight: var(--eo-font-semibold);
+  color: var(--eo-color-text-white);
+  background-color: var(--eo-color-primary);
   border: none;
-  border-radius: 4px;
+  border-radius: var(--eo-rounded-md);
   cursor: pointer;
   transition: background-color 0.15s ease-in-out;
-  margin-top: 1rem;
+  margin-top: var(--eo-spacing-4);
 }
-
-.generate-doc-button:hover {
-  background-color: #218838;
+.eo-generate-doc-button:hover {
+  background-color: var(--eo-color-primary-hover);
 }
-
-.generate-doc-button:disabled {
-  background-color: #ccc;
+.eo-generate-doc-button:disabled {
+  background-color: #9ca3af; /* gray-400 */
   cursor: not-allowed;
 }
 
-.export-error { /* Using error-message class from global or Home.css if defined */
-  background-color: #f8d7da;
-  color: #721c24;
-  border: 1px solid #f5c6cb;
-  padding: 0.75rem 1.25rem;
-  border-radius: 0.25rem;
-  margin-top: 1.5rem;
+.eo-error-message, .eo-generation-result {
+  padding: var(--eo-spacing-3) var(--eo-spacing-4);
+  border-radius: var(--eo-rounded-md);
+  margin-top: var(--eo-spacing-4);
+  text-align: left;
 }
-
-.generation-result {
-  margin-top: 1.5rem;
-  padding: 1rem;
-  border: 1px solid #c3e6cb; /* Green border for success */
-  border-radius: 4px;
-  background-color: #d4edda; /* Light green background */
-  color: #155724;
+.eo-error-message {
+  background-color: #fee2e2; /* red-100 */
+  color: #b91c1c; /* red-700 */
+  border: 1px solid #fca5a5; /* red-300 */
 }
-
-.generation-result h4 {
+.eo-generation-result {
+  background-color: #d1fae5; /* green-100 */
+  color: #065f46; /* green-700 */
+  border: 1px solid #6ee7b7; /* green-300 */
+}
+.eo-generation-result h4 {
   margin-top: 0;
+  font-weight: var(--eo-font-semibold);
 }
-
-.download-link {
+.eo-download-link {
   display: inline-block;
-  margin-top: 0.5rem;
-  padding: 0.5rem 1rem;
-  background-color: #007bff;
-  color: white;
+  margin-top: var(--eo-spacing-2);
+  padding: var(--eo-spacing-2) var(--eo-spacing-3);
+  background-color: var(--eo-color-primary);
+  color: var(--eo-color-text-white);
   text-decoration: none;
-  border-radius: 4px;
+  border-radius: var(--eo-rounded-md);
+  font-size: var(--eo-text-sm);
+}
+.eo-download-link:hover {
+  background-color: var(--eo-color-primary-hover);
 }
 
-.download-link:hover {
-  background-color: #0056b3;
+
+/* Footer Styles */
+.eo-footer { /* py-6 px-10 text-center text-sm text-gray-500 border-t bg-white */
+  padding: var(--eo-spacing-6) var(--eo-spacing-10);
+  text-align: center;
+  font-size: var(--eo-text-sm);
+  color: var(--eo-color-text-muted); /* text-gray-500 */
+  border-top: 1px solid var(--eo-color-border-light);
+  background-color: var(--eo-color-header-bg);
+}
+
+/* Centered container for initial !taskId message */
+.eo-container-centered {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 80vh; /* Take up most of viewport height */
+    text-align: center;
+    font-size: var(--eo-text-lg);
+    color: var(--eo-color-text-muted);
+}
+
+/* Material Icons specific adjustments if needed */
+.material-icons.eo-search-icon {
+  vertical-align: middle;
 }

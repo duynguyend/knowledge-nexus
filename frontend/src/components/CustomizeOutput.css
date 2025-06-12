@@ -1,75 +1,375 @@
 /* CustomizeOutput.css */
-.customize-output-container {
-  max-width: 800px;
-  margin: 2rem auto;
-  padding: 2rem;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  background-color: #f9f9f9;
+
+/* Global Variables (prefixed with co-) */
+:root {
+  --co-color-bg: #ffffff; /* bg-white for body */
+  --co-color-bg-alt: #f9fafb; /* bg-gray-50 for main area */
+
+  --co-color-text-primary: #111827; /* text-gray-900 (example, adjust based on actual gray shades) */
+  --co-color-text-secondary: #4b5563; /* text-gray-700 */
+  --co-color-text-muted: #6b7280;   /* text-gray-600 / text-gray-500 */
+  --co-color-text-header: #374151;  /* text-gray-800 for header titles */
+
+  --co-color-border: #e5e7eb;       /* border-gray-200 / border-b-gray-200 */
+  --co-color-border-input: #d1d5db; /* border-gray-300 */
+
+  --co-color-primary: #3d98f4;        /* Primary blue color from design */
+  --co-color-primary-hover: #3189e0;   /* Hover for primary button */
+  --co-color-primary-light-bg: rgba(61, 152, 244, 0.1); /* bg-[#3d98f4]/10 */
+
+  --co-color-button-secondary-bg: #f3f4f6;      /* bg-gray-100 for icon button */
+  --co-color-button-secondary-hover-bg: #e5e7eb; /* hover:bg-gray-200 */
+
+  --co-font-sans: 'Inter', "Noto Sans", sans-serif;
+
+  --co-spacing-1: 0.25rem;
+  --co-spacing-2: 0.5rem;
+  --co-spacing-3: 0.75rem;
+  --co-spacing-4: 1rem;
+  --co-spacing-5: 1.25rem;
+  --co-spacing-6: 1.5rem;
+  --co-spacing-8: 2rem;
+  --co-spacing-10: 2.5rem;
+  --co-spacing-20: 5rem; /* For md:px-20 */
+  --co-spacing-40: 10rem; /* For lg:px-40 */
+
+  --co-text-sm: 0.875rem;
+  --co-text-base: 1rem;
+  --co-text-lg: 1.125rem; /* Not explicitly in this design but good to have */
+  --co-text-xl: 1.25rem;
+  --co-text-2xl: 1.5rem; /* For icons */
+  --co-text-3xl: 1.875rem;
+
+  --co-font-normal: 400;
+  --co-font-medium: 500;
+  --co-font-semibold: 600;
+  --co-font-bold: 700;
+
+  --co-leading-tight: 1.25;
+  --co-leading-normal: 1.5;
+
+  --co-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --co-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+
+  --co-checkbox-tick-svg: url('data:image/svg+xml,%3csvg viewBox=%270 0 16 16%27 fill=%27rgb(255,255,255)%27 xmlns=%27http://www.w3.org/2000/svg%27%3e%3cpath d=%27M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z%27/%3e%3c/svg%3e');
 }
 
-.customize-output-container header {
-  text-align: center;
-  margin-bottom: 2rem;
+.co-body-bg {
+  background-color: var(--co-color-bg);
+  font-family: var(--co-font-sans);
+  color: var(--co-color-text-primary);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
-.customization-section {
-  margin-bottom: 2rem;
-  padding: 1.5rem;
-  border: 1px solid #eee;
-  border-radius: 6px;
-  background-color: #fff;
+.co-layout-container {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  width: 100%;
 }
 
-.customization-section h2 {
-  margin-top: 0;
-  margin-bottom: 1rem;
-  font-size: 1.5rem;
-  color: #333;
+/* Header Styles */
+.co-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  white-space: nowrap;
+  border-bottom: 1px solid var(--co-color-border);
+  padding: var(--co-spacing-4) var(--co-spacing-10);
+  box-shadow: var(--co-shadow-sm);
+  background-color: var(--co-color-bg); /* Added for context */
 }
 
-.template-options label,
-.citation-style-options label,
-.sections-to-include-options label {
-  display: block;
-  margin-bottom: 0.75rem;
-  font-size: 1rem;
-  cursor: pointer;
+.co-header-logo-title {
+  display: flex;
+  align-items: center;
+  gap: var(--co-spacing-4);
+  color: var(--co-color-text-header);
 }
 
-.template-options input[type="radio"],
-.citation-style-options input[type="radio"],
-.sections-to-include-options input[type="checkbox"] {
-  margin-right: 0.5rem;
+.co-logo-svg-container {
+  width: 1.5rem; /* size-6 */
+  height: 1.5rem;
+  color: var(--co-color-primary);
+}
+.co-logo-svg-container svg {
+  width: 100%;
+  height: 100%;
 }
 
-.generate-button-container {
-  text-align: center;
-  margin-top: 2rem;
+.co-header-title-text {
+  font-size: var(--co-text-xl);
+  font-weight: var(--co-font-semibold);
+  line-height: var(--co-leading-tight);
+  letter-spacing: var(--co-leading-tight); /* Assuming tracking-tight is -0.025em */
 }
 
-.generate-document-button {
-  padding: 0.8rem 1.5rem;
-  font-size: 1.1rem;
-  color: #fff;
-  background-color: #007bff;
+.co-header-actions {
+  display: flex;
+  flex: 1; /* flex-1 */
+  justify-content: flex-end; /* justify-end */
+  gap: var(--co-spacing-3);
+  align-items: center; /* Added for vertical alignment */
+}
+
+.co-icon-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px; /* rounded-full */
+  height: 2.5rem; /* h-10 */
+  width: 2.5rem;  /* w-10 */
+  color: var(--co-color-text-secondary);
+  background-color: var(--co-color-button-secondary-bg);
   border: none;
-  border-radius: 5px;
   cursor: pointer;
-  transition: background-color 0.2s ease-in-out;
+  transition: background-color 0.15s ease-in-out;
+}
+.co-icon-button:hover {
+  background-color: var(--co-color-button-secondary-hover-bg);
+}
+.co-icon-button .material-symbols-outlined {
+  font-size: var(--co-text-2xl); /* data-size="24px" */
 }
 
-.generate-document-button:hover {
-  background-color: #0056b3;
+.co-profile-pic {
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  border-radius: 9999px;
+  width: 2.5rem; /* size-10 */
+  height: 2.5rem;
+  border: 1px solid var(--co-color-border-input); /* border-gray-300 */
 }
 
-.generate-document-button:disabled {
-  background-color: #ccc;
+/* Main Content Styles */
+.co-main-content {
+  padding: var(--co-spacing-8) var(--co-spacing-10); /* py-8, default px-10 */
+  background-color: var(--co-color-bg-alt);
+  flex: 1; /* flex-1 */
+  display: flex; /* justify-center */
+  justify-content: center;
+}
+
+/* Responsive padding for main content */
+@media (min-width: 768px) { /* md:px-20 */
+  .co-main-content {
+    padding-left: var(--co-spacing-20);
+    padding-right: var(--co-spacing-20);
+  }
+}
+@media (min-width: 1024px) { /* lg:px-40 */
+  .co-main-content {
+    padding-left: var(--co-spacing-40);
+    padding-right: var(--co-spacing-40);
+  }
+}
+
+.co-content-wrapper { /* layout-content-container */
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 42rem; /* max-w-2xl (672px) */
+  padding-top: var(--co-spacing-5); /* py-5 */
+  padding-bottom: var(--co-spacing-5);
+}
+
+.co-title-section {
+  margin-bottom: var(--co-spacing-8);
+}
+.co-main-title {
+  color: var(--co-color-text-primary); /* text-gray-900 */
+  font-size: var(--co-text-3xl);
+  font-weight: var(--co-font-bold);
+  line-height: var(--co-leading-tight);
+  letter-spacing: -0.025em; /* tracking-tight */
+}
+.co-subtitle {
+  color: var(--co-color-text-muted); /* text-gray-600 */
+  margin-top: var(--co-spacing-1);
+  font-size: var(--co-text-base);
+  line-height: var(--co-leading-normal); /* Added for consistency */
+}
+
+.co-section {
+  margin-bottom: var(--co-spacing-8);
+}
+.co-section-title {
+  color: var(--co-color-text-header); /* text-gray-800 */
+  font-size: var(--co-text-xl);
+  font-weight: var(--co-font-semibold);
+  line-height: var(--co-leading-tight);
+  letter-spacing: -0.025em; /* tracking-tight */
+  margin-bottom: var(--co-spacing-4);
+}
+
+/* Radio Card Styles */
+.co-radio-card-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* grid-cols-2 */
+  gap: var(--co-spacing-4); /* gap-4 */
+}
+/* For sm:grid-cols-2, it's already 2, so this is fine. Can add sm specific if needed */
+
+.co-radio-card {
+  font-size: var(--co-text-sm);
+  font-weight: var(--co-font-medium);
+  line-height: var(--co-leading-normal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.5rem; /* rounded-lg */
+  border: 1px solid var(--co-color-border-input); /* border-gray-300 */
+  padding: var(--co-spacing-4);
+  height: auto; /* h-auto */
+  color: var(--co-color-text-secondary); /* text-gray-700 */
+  position: relative;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out; /* transition-all duration-150 */
+  text-align: center; /* Added for better text centering */
+}
+.co-radio-card:hover {
+  box-shadow: var(--co-shadow-sm); /* hover:shadow-sm */
+}
+.co-radio-card.co-radio-card-selected { /* Simulating :has(:checked) */
+  border-width: 2px; /* has-[:checked]:border-2 */
+  border-color: var(--co-color-primary); /* has-[:checked]:border-[#3d98f4] */
+  background-color: var(--co-color-primary-light-bg); /* has-[:checked]:bg-[#3d98f4]/10 */
+  color: var(--co-color-primary); /* has-[:checked]:text-[#3d98f4] */
+}
+.co-radio-input { /* invisible absolute */
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+/* JavaScript will be needed to add 'co-radio-card-selected' to the label when input is checked,
+   or use :has() if browser support is not an issue for the project.
+   If using :has():
+   .co-radio-card:has(.co-radio-input:checked) { ... selected styles ... }
+*/
+.co-radio-card:has(.co-radio-input:checked) {
+  border-width: 2px;
+  border-color: var(--co-color-primary);
+  background-color: var(--co-color-primary-light-bg);
+  color: var(--co-color-primary);
+}
+
+
+/* Checkbox List Styles */
+.co-checkbox-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--co-spacing-3); /* space-y-3 */
+}
+
+.co-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: var(--co-spacing-3); /* gap-x-3 */
+  padding: var(--co-spacing-3);
+  border-radius: 0.375rem; /* rounded-md */
+  transition: background-color 0.15s ease-in-out; /* transition-colors duration-150 */
+  cursor: pointer;
+}
+.co-checkbox-label:hover {
+  background-color: var(--co-color-button-secondary-bg); /* hover:bg-gray-100 */
+}
+
+.co-checkbox-input {
+  appearance: none; /* Remove default appearance */
+  height: 1.25rem; /* h-5 */
+  width: 1.25rem; /* w-5 */
+  border-radius: 0.25rem; /* rounded */
+  border: 2px solid var(--co-color-border-input); /* border-gray-300 border-2 */
+  background-color: var(--co-color-bg); /* bg-white */
+  cursor: pointer;
+  display: inline-block;
+  position: relative;
+}
+.co-checkbox-input:checked {
+  background-color: var(--co-color-primary); /* checked:bg-[#3d98f4] */
+  border-color: var(--co-color-primary);   /* checked:border-[#3d98f4] */
+  background-image: var(--co-checkbox-tick-svg); /* checked:bg-[image:--checkbox-tick-svg] */
+  background-repeat: no-repeat;
+  background-position: center;
+}
+.co-checkbox-input:focus {
+  outline: none;
+  /* focus:ring-2 focus:ring-[#3d98f4]/50 focus:ring-offset-0 focus:border-[#3d98f4] */
+  box-shadow: 0 0 0 2px rgba(61, 152, 244, 0.5); /* Simplified ring */
+  border-color: var(--co-color-primary);
+}
+
+.co-checkbox-text {
+  color: var(--co-color-text-secondary); /* text-gray-700 */
+  font-size: var(--co-text-base);
+  font-weight: var(--co-font-normal);
+  line-height: var(--co-leading-normal);
+}
+
+/* Generate Button Styles */
+.co-generate-button-container {
+  display: flex;
+  justify-content: flex-end; /* justify-end */
+  margin-top: var(--co-spacing-8);
+}
+
+.co-generate-button {
+  display: flex; /* flex */
+  min-width: 84px; /* min-w-[84px] */
+  max-width: 480px; /* max-w-[480px] */
+  cursor: pointer;
+  align-items: center; /* items-center */
+  justify-content: center; /* justify-center */
+  overflow: hidden; /* overflow-hidden */
+  border-radius: 9999px; /* rounded-full */
+  height: 3rem; /* h-12 */
+  padding-left: var(--co-spacing-6);  /* px-6 */
+  padding-right: var(--co-spacing-6);
+  background-color: var(--co-color-primary);
+  color: var(--co-color-bg); /* text-white */
+  font-size: var(--co-text-base);
+  font-weight: var(--co-font-semibold);
+  line-height: var(--co-leading-normal);
+  letter-spacing: 0.025em; /* tracking-wide */
+  box-shadow: var(--co-shadow-md);
+  transition: background-color 0.15s ease-in-out; /* transition-colors duration-150 */
+  border: none;
+}
+.co-generate-button:hover {
+  background-color: var(--co-color-primary-hover); /* hover:bg-[#3189e0] */
+}
+.co-generate-button:focus {
+  outline: none;
+  /* focus:ring-2 focus:ring-[#3d98f4]/50 focus:ring-offset-2 */
+  box-shadow: var(--co-shadow-md), 0 0 0 2px var(--co-color-bg), 0 0 0 4px rgba(61, 152, 244, 0.5);
+}
+.co-generate-button:disabled {
+  background-color: #9ca3af; /* Example disabled color: gray-400 */
   cursor: not-allowed;
+  box-shadow: none;
+}
+.co-generate-button .truncate { /* class="truncate" */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.error-message {
-  color: red;
+/* Error Message (basic styling) */
+.co-error-message {
+  color: #dc2626; /* text-red-600 */
+  background-color: #fee2e2; /* bg-red-100 */
+  border: 1px solid #fca5a5; /* border-red-300 */
+  padding: var(--co-spacing-3) var(--co-spacing-4);
+  border-radius: 0.375rem; /* rounded-md */
+  margin-bottom: var(--co-spacing-4);
   text-align: center;
-  margin-top: 1rem;
+}
+
+/* Material Symbols specific adjustments if needed */
+.material-symbols-outlined {
+  vertical-align: middle; /* Common adjustment */
 }

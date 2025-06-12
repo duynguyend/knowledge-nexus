@@ -1,101 +1,372 @@
-.home-container {
+/* Global Styles & Variables (inspired by Tailwind's defaults) */
+:root {
+  --kn-color-slate-50: #f8fafc;    /* bg-slate-50 */
+  --kn-color-slate-100: #f1f5f9;   /* bg-slate-100, hover:bg-blue-100 (for blue, a lighter blue) */
+  --kn-color-slate-200: #e2e8f0;   /* border-slate-200 */
+  --kn-color-slate-300: #cbd5e1;   /* border-slate-300 for input */
+  --kn-color-slate-400: #94a3b8;   /* placeholder-slate-400 */
+  --kn-color-slate-500: #64748b;   /* text-slate-500 for search icon & footer */
+  --kn-color-slate-600: #475569;   /* text-slate-600 for subtitle & notification icon */
+  --kn-color-slate-700: #334155;   /* text-slate-700 for nav links & popular topic text */
+  --kn-color-slate-800: #1e293b;   /* text-slate-800 for popular topics title */
+  --kn-color-slate-900: #0f172a;   /* text-slate-900 for main title, header title */
+
+  --kn-color-blue-100: #DBEAFE;    /* hover:bg-blue-100 for popular topics */
+  --kn-color-blue-200: #BFDBFE;    /* focus:ring-blue-200 for input */
+  --kn-color-blue-500: #3B82F6;    /* focus:border-blue-500 for input */
+  --kn-color-blue-600: #2563eb;    /* text-blue-600 for logo, hover for nav links */
+  --kn-color-blue-700: #1D4ED8;    /* hover:text-blue-700 for popular topics, hover for button */
+
+  --kn-color-white: #ffffff;       /* bg-white */
+
+  --kn-font-sans: 'Inter', "Noto Sans", sans-serif;
+
+  --kn-spacing-1: 0.25rem;    /* gap-1, p-1, etc. (4px) */
+  --kn-spacing-2: 0.5rem;     /* gap-2, p-2, mb-2 (8px) */
+  --kn-spacing-3: 0.75rem;    /* gap-3, p-3 (12px) */
+  --kn-spacing-3_5: 0.875rem; /* py-3.5 for input (14px) */
+  --kn-spacing-4: 1rem;       /* gap-4, p-4, px-4, py-4, mb-4 (16px) */
+  --kn-spacing-6: 1.5rem;     /* gap-6, p-6 (24px) */
+  --kn-spacing-8: 2rem;       /* p-8, mb-8, py-8 (32px) */
+  --kn-spacing-10: 2.5rem;    /* px-10 for header/footer (40px) */
+  --kn-spacing-12: 3rem;      /* py-12 for main (48px) */
+  --kn-spacing-40: 10rem;     /* px-40 for main (not standard tailwind, but from design) -> use more generic padding like px-10 or similar */
+
+  --kn-text-sm: 0.875rem;     /* 14px */
+  --kn-text-base: 1rem;       /* 16px */
+  --kn-text-lg: 1.125rem;     /* 18px */
+  --kn-text-xl: 1.25rem;      /* 20px */
+  --kn-text-2xl: 1.5rem;      /* 24px used for material icon */
+  --kn-text-4xl: 2.25rem;     /* 36px */
+
+  --kn-font-medium: 500;
+  --kn-font-semibold: 600;
+  --kn-font-bold: 700;
+
+  --kn-leading-tight: 1.25;
+  --kn-leading-normal: 1.5;
+
+  --kn-tracking-tight: -0.025em;
+  --kn-tracking-wide: 0.025em; /* Example if needed */
+
+  --kn-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --kn-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --kn-ring-offset-shadow: 0 0 #0000; /* For focus rings */
+  --kn-ring-shadow: 0 0 #0000; /* For focus rings */
+}
+
+/* Apply base font to body if not already done in index.css or a global stylesheet */
+/* body { font-family: var(--kn-font-sans); } */
+
+.kn-body-bg {
+  background-color: var(--kn-color-slate-50);
+  font-family: var(--kn-font-sans);
+  color: var(--kn-color-slate-900); /* Default text color */
+  min-height: 100vh;
+  display: flex; /* To make layout-container take full height */
+  flex-direction: column; /* To make layout-container take full height */
+}
+
+.kn-layout-container {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  padding: 2rem;
-  margin-top: 2rem;
-  background-color: #ffffff;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  max-width: 700px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.home-header {
-  text-align: center;
-  margin-bottom: 2rem;
-}
-
-.home-header h1 {
-  font-size: 2.2rem;
-  color: #333;
-  margin-bottom: 0.5rem;
-}
-
-.home-subtitle {
-  font-size: 1.1rem;
-  color: #666;
-  max-width: 500px;
-}
-
-.research-input-section {
-  display: flex;
+  flex-grow: 1; /* Takes available space */
   width: 100%;
-  margin-bottom: 1.5rem;
 }
 
-.research-topic-input {
-  flex-grow: 1;
-  padding: 0.8rem 1rem;
-  font-size: 1rem;
-  border: 1px solid #ccc;
-  border-radius: 4px 0 0 4px;
-  outline: none;
+/* Header Styles */
+.kn-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  white-space: nowrap;
+  border-bottom: 1px solid var(--kn-color-slate-200);
+  padding: var(--kn-spacing-4) var(--kn-spacing-10);
+  background-color: var(--kn-color-white);
 }
 
-.research-topic-input:focus {
-  border-color: #007bff;
-  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+.kn-header-logo-title {
+  display: flex;
+  align-items: center;
+  gap: var(--kn-spacing-3);
+  color: var(--kn-color-slate-900);
 }
 
-.start-research-button {
-  padding: 0.8rem 1.5rem;
-  font-size: 1rem;
-  color: #fff;
-  background-color: #007bff;
-  border: 1px solid #007bff;
-  border-radius: 0 4px 4px 0;
+.kn-logo-svg {
+  width: 1.75rem; /* size-7 from design (28px) */
+  height: 1.75rem;
+  color: var(--kn-color-blue-600);
+}
+
+.kn-header-title-text {
+  color: var(--kn-color-slate-900);
+  font-size: var(--kn-text-xl);
+  font-weight: var(--kn-font-bold);
+  line-height: var(--kn-leading-tight);
+  letter-spacing: -0.015em; /* custom tracking */
+}
+
+.kn-header-nav-actions {
+  display: flex;
+  flex: 1;
+  justify-content: flex-end;
+  align-items: center;
+  gap: var(--kn-spacing-6);
+}
+
+.kn-nav {
+  display: flex;
+  align-items: center;
+  gap: var(--kn-spacing-6);
+}
+
+.kn-nav-link {
+  color: var(--kn-color-slate-700);
+  font-size: var(--kn-text-sm);
+  font-weight: var(--kn-font-medium);
+  line-height: var(--kn-leading-normal);
+  text-decoration: none;
+  transition: color 0.15s ease-in-out;
+}
+
+.kn-nav-link:hover {
+  color: var(--kn-color-blue-600);
+}
+
+.kn-icon-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px; /* rounded-full */
+  height: 2.5rem; /* h-10 (40px) */
+  width: 2.5rem;  /* w-10 (40px) */
+  color: var(--kn-color-slate-600);
+  background-color: transparent;
+  border: none;
   cursor: pointer;
   transition: background-color 0.15s ease-in-out;
 }
 
-.start-research-button:hover {
-  background-color: #0056b3;
+.kn-icon-button:hover {
+  background-color: var(--kn-color-slate-100);
 }
 
-.error-message {
-  background-color: #f8d7da;
-  color: #721c24;
-  border: 1px solid #f5c6cb;
-  padding: 0.75rem 1.25rem;
-  border-radius: 0.25rem;
-  margin-top: 1rem;
+.kn-icon-button .material-symbols-outlined {
+  font-size: var(--kn-text-2xl); /* text-2xl for icon */
+}
+
+.kn-profile-pic {
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  border-radius: 9999px; /* rounded-full */
+  width: 2.5rem;  /* size-10 (40px) */
+  height: 2.5rem;
+  border: 1px solid var(--kn-color-slate-200);
+  box-shadow: var(--kn-shadow-sm);
+}
+
+/* Main Content Styles */
+.kn-main-content {
+  flex: 1;
+  /* px-40 from design is very large, using a more standard approach for centering */
+  padding: var(--kn-spacing-12) var(--kn-spacing-4); /* py-12, and px-4 for smaller screens */
+  display: flex;
+  justify-content: center;
+}
+
+.kn-main-content-container { /* Corresponds to layout-content-container */
+  display: flex;
+  flex-direction: column;
+  max-width: 42rem; /* max-w-2xl (672px) */
   width: 100%;
+  align-items: center;
+}
+
+.kn-search-card {
+  width: 100%;
+  background-color: var(--kn-color-white);
+  padding: var(--kn-spacing-8);
+  border-radius: 0.75rem; /* rounded-xl */
+  box-shadow: var(--kn-shadow-lg);
+  border: 1px solid var(--kn-color-slate-200);
+}
+
+.kn-search-card-header {
+  text-align: center;
+  margin-bottom: var(--kn-spacing-8);
+}
+
+.kn-search-title {
+  color: var(--kn-color-slate-900);
+  font-size: var(--kn-text-4xl);
+  font-weight: var(--kn-font-bold);
+  line-height: var(--kn-leading-tight);
+  letter-spacing: var(--kn-tracking-tight);
+  margin-bottom: var(--kn-spacing-2);
+}
+
+.kn-search-subtitle {
+  color: var(--kn-color-slate-600);
+  font-size: var(--kn-text-lg);
+  line-height: var(--kn-leading-normal); /* Assuming normal line height for lg text */
+}
+
+.kn-search-input-wrapper {
+  position: relative;
+  margin-bottom: var(--kn-spacing-8);
+}
+
+.kn-search-icon-wrapper {
+  position: absolute;
+  inset-inline-start: 0; /* left-0 */
+  padding-inline-start: var(--kn-spacing-4); /* pl-4 */
+  display: flex;
+  align-items: center;
+  height: 100%; /* inset-y-0 */
+  pointer-events: none;
+}
+
+.kn-search-icon { /* material-symbols-outlined text-slate-500 */
+  color: var(--kn-color-slate-500);
+  font-size: var(--kn-text-2xl); /* Ensure consistency with other icons */
+}
+
+.kn-search-input { /* form-input w-full pl-12 pr-4 py-3.5 text-base rounded-lg border-slate-300 ... */
+  width: 100%;
+  padding-top: var(--kn-spacing-3_5);
+  padding-bottom: var(--kn-spacing-3_5);
+  padding-left: 3rem; /* pl-12 (12 * 0.25rem = 3rem) */
+  padding-right: var(--kn-spacing-4);
+  font-size: var(--kn-text-base);
+  border-radius: 0.5rem; /* rounded-lg */
+  border: 1px solid var(--kn-color-slate-300);
+  color: var(--kn-color-slate-900); /* Default text color for input */
+  transition: box-shadow 0.15s ease-in-out, border-color 0.15s ease-in-out; /* transition-shadow */
   box-sizing: border-box;
 }
+.kn-search-input::placeholder {
+  color: var(--kn-color-slate-400);
+}
+.kn-search-input:focus {
+  outline: none;
+  border-color: var(--kn-color-blue-500);
+  /* Tailwind's focus:ring-2 focus:ring-blue-200 */
+  box-shadow: 0 0 0 2px var(--kn-color-blue-200);
+}
 
-.research-status-display {
-  margin-top: 1.5rem;
-  padding: 1rem;
-  border: 1px solid #e0e0e0;
-  border-radius: 4px;
-  background-color: #f9f9f9;
+.kn-popular-topics-section {
+  margin-bottom: var(--kn-spacing-6);
+}
+
+.kn-popular-topics-title {
+  color: var(--kn-color-slate-800);
+  font-size: var(--kn-text-xl);
+  font-weight: var(--kn-font-semibold);
+  line-height: var(--kn-leading-tight);
+  letter-spacing: var(--kn-tracking-tight);
+  margin-bottom: var(--kn-spacing-4);
+}
+
+.kn-popular-topics-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--kn-spacing-3);
+}
+
+.kn-popular-topic-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--kn-spacing-2); /* gap-x-2 */
+  border-radius: 9999px; /* rounded-full */
+  background-color: var(--kn-color-slate-100);
+  color: var(--kn-color-slate-700);
+  padding: var(--kn-spacing-2) var(--kn-spacing-4); /* px-4 py-2 */
+  font-size: var(--kn-text-sm);
+  font-weight: var(--kn-font-medium);
+  border: none;
+  cursor: pointer;
+  transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out;
+}
+.kn-popular-topic-button:hover {
+  background-color: var(--kn-color-blue-100);
+  color: var(--kn-color-blue-700);
+}
+
+.kn-start-research-button {
   width: 100%;
-  text-align: left;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--kn-spacing-2);
+  background-color: var(--kn-color-blue-600);
+  color: var(--kn-color-white);
+  font-weight: var(--kn-font-semibold);
+  padding: var(--kn-spacing-3) var(--kn-spacing-6); /* py-3 px-6 */
+  border-radius: 0.5rem; /* rounded-lg */
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.15s ease-in-out;
+  font-size: var(--kn-text-base);
+}
+.kn-start-research-button:hover {
+  background-color: var(--kn-color-blue-700);
+}
+.kn-start-research-button .material-symbols-outlined {
+  font-size: var(--kn-text-xl); /* Adjust if default icon size is too large/small */
 }
 
-.research-status-display h3 {
-  margin-top: 0;
-  color: #333;
+/* Footer Styles */
+.kn-footer {
+  padding: var(--kn-spacing-8) var(--kn-spacing-10);
+  text-align: center;
+  border-top: 1px solid var(--kn-color-slate-200);
+  background-color: var(--kn-color-white);
 }
 
-.research-status-display p {
-  margin: 0.5rem 0;
-  font-size: 0.95rem;
-  color: #555;
+.kn-footer-text {
+  font-size: var(--kn-text-sm);
+  color: var(--kn-color-slate-500);
 }
 
-.research-status-display p strong {
-  color: #333;
+/* Error message styling (if needed for the new error display spot) */
+.kn-error-message {
+  background-color: #f8d7da; /* Keep similar to old one for now */
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+  padding: var(--kn-spacing-3) var(--kn-spacing-4);
+  border-radius: 0.25rem;
+  margin-top: var(--kn-spacing-4); /* Space it out from input */
+  margin-bottom: var(--kn-spacing-4); /* Space it out from popular topics */
+  width: 100%;
+  box-sizing: border-box;
+  text-align: center;
+}
+.kn-error-message p {
+  margin: 0;
+}
+
+/* Responsive adjustments for main content padding */
+@media (min-width: 768px) { /* Tailwind 'md' breakpoint */
+  .kn-main-content {
+    padding-left: var(--kn-spacing-10); /* Increase horizontal padding on larger screens */
+    padding-right: var(--kn-spacing-10);
+  }
+}
+@media (min-width: 1024px) { /* Tailwind 'lg' breakpoint */
+  .kn-main-content {
+     /* The design's px-40 is too large. max-w-2xl on child will handle width.
+        Let's use a more reasonable padding like lg:px-8 from tailwind for container */
+     /* padding-left: var(--kn-spacing-40); */ /* This was too much */
+     /* padding-right: var(--kn-spacing-40); */
+  }
+}
+
+/* Styles for Material Symbols if they need specific adjustments beyond the global one */
+.material-symbols-outlined {
+  /* Default settings are in index.html or global scope */
+  /* Override here if a specific icon needs different weight, fill, etc. */
+  /* Example: .kn-search-icon { font-variation-settings: 'wght' 300; } */
+  vertical-align: middle; /* Helps align icons with text */
 }
