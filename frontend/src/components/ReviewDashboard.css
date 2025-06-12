@@ -1,282 +1,124 @@
-/* ReviewDashboard.css */
-
-/* Global Variables (prefixed with rd-) */
-:root {
-  --rd-color-bg: #f8fafc; /* bg-slate-50 */
-  --rd-color-sidebar-bg: #ffffff; /* bg-white for sidebar */
-  --rd-color-main-bg: #f8fafc; /* bg-slate-50 for main, effectively same as body */
-  --rd-color-card-bg: #ffffff; /* bg-white for tables */
-
-  --rd-color-text-primary: #1e293b; /* text-slate-800 (sidebar title, main title) */
-  --rd-color-text-secondary: #334155; /* text-slate-700 (nav links, section titles, table text) */
-  --rd-color-text-muted: #64748b;    /* text-slate-600 (table headers, some table text) */
-  --rd-color-text-light: #94a3b8;    /* text-slate-500 (sidebar version, nav icons, some table text) */
-  --rd-color-text-white: #ffffff;
-
-  --rd-color-border: #e2e8f0; /* border-slate-200 */
-
-  --rd-color-primary: #2563eb;      /* bg-blue-600 (active nav link bg) */
-  --rd-color-primary-hover-bg: #3b82f6; /* Slightly lighter blue for button hover if needed */
-  --rd-color-primary-text-button: #2563eb; /* text-blue-600 for table action buttons */
-  --rd-color-primary-light-bg-button-hover: #eff6ff; /* hover:bg-blue-100 for table action button hover */
-
-  --rd-color-nav-hover-bg: #f1f5f9; /* hover:bg-slate-100 for nav links */
-
-  --rd-color-status-yellow-text: #854d0e; /* text-yellow-700 */
-  --rd-color-status-yellow-bg: #fef9c3;   /* bg-yellow-100 */
-  --rd-color-status-green-text: #166534; /* text-green-700 */
-  --rd-color-status-green-bg: #dcfce7;   /* bg-green-100 */
-
-  --rd-font-sans: 'Inter', "Noto Sans", sans-serif;
-
-  --rd-spacing-1: 0.25rem;  /* For small gaps if needed */
-  --rd-spacing-2: 0.5rem;   /* gap-2 for nav list */
-  --rd-spacing-2_5: 0.625rem;/* py-2.5 for nav links */
-  --rd-spacing-3: 0.75rem;  /* gap-3 for nav items, px-3 for nav items & button */
-  --rd-spacing-4: 1rem;     /* p-4 for table cells */
-  --rd-spacing-6: 1.5rem;   /* p-6 for sidebar, mb-6 for section titles */
-  --rd-spacing-8: 2rem;     /* p-8 for main content, mb-8 for sidebar header */
-  --rd-spacing-10: 2.5rem;  /* mb-10 for main header & sections */
-
-  --rd-text-xs: 0.75rem;    /* 12px */
-  --rd-text-sm: 0.875rem;   /* 14px */
-  --rd-text-xl: 1.25rem;    /* 20px */
-  --rd-text-2xl: 1.5rem;    /* 24px */
-  --rd-text-4xl: 2.25rem;   /* 36px */
-
-  --rd-font-medium: 500;
-  --rd-font-semibold: 600;
-  --rd-font-bold: 700;
-
-  --rd-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1); /* From active nav link */
-  --rd-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1); /* From table container */
-
-  --rd-rounded-lg: 0.5rem;
-  --rd-rounded-xl: 0.75rem;
-  --rd-rounded-full: 9999px;
-  --rd-rounded-md: 0.375rem; /* For button */
-}
-
 .rd-page-container {
-  font-family: var(--rd-font-sans);
-  background-color: var(--rd-color-bg);
-  color: var(--rd-color-text-secondary); /* Default text color */
-  /* display: flex; (This is on rd-layout-wrapper and rd-flex-main-area instead) */
-  min-height: 100vh; /* size-full min-h-screen */
-  /* overflow-x-hidden; (Applied on body/root in design) */
-}
-
-.rd-layout-wrapper { /* layout-container flex h-full grow flex-col */
-  display: flex;
-  flex-direction: column;
-  flex-grow: 1;
-  height: 100%; /* h-full */
-}
-
-.rd-flex-main-area { /* flex flex-1 */
-  display: flex;
+  padding: 1.5rem;
+  background-color: #f8fafc;
   flex: 1;
-}
-
-/* Sidebar Styles */
-.rd-sidebar { /* w-64 bg-white p-6 flex flex-col justify-between border-r border-slate-200 */
-  width: 16rem; /* w-64 */
-  background-color: var(--rd-color-sidebar-bg);
-  padding: var(--rd-spacing-6);
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  border-right: 1px solid var(--rd-color-border);
-  flex-shrink: 0; /* Prevent sidebar from shrinking */
 }
 
-.rd-sidebar-header { /* mb-8 */
-  margin-bottom: var(--rd-spacing-8);
-}
-
-.rd-sidebar-title { /* text-xl font-semibold text-slate-800 */
-  font-size: var(--rd-text-xl);
-  font-weight: var(--rd-font-semibold);
-  color: var(--rd-color-text-primary);
-}
-
-.rd-sidebar-version { /* text-xs text-slate-500 */
-  font-size: var(--rd-text-xs);
-  color: var(--rd-color-text-light);
-}
-
-.rd-nav-list { /* flex flex-col gap-2 */
-  display: flex;
-  flex-direction: column;
-  gap: var(--rd-spacing-2);
-}
-
-.rd-nav-link { /* flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors */
-  display: flex;
-  align-items: center;
-  gap: var(--rd-spacing-3);
-  padding: var(--rd-spacing-2_5) var(--rd-spacing-3);
-  border-radius: var(--rd-rounded-lg);
-  text-decoration: none;
-  transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out;
-  color: var(--rd-color-text-secondary); /* text-slate-700 */
-}
-.rd-nav-link:hover { /* hover:bg-slate-100 */
-  background-color: var(--rd-color-nav-hover-bg);
-}
-.rd-nav-icon { /* material-icons text-slate-500 */
-  color: var(--rd-color-text-light);
-  font-size: var(--rd-text-2xl); /* Default for material icons */
-}
-.rd-nav-text { /* text-sm font-medium */
-  font-size: var(--rd-text-sm);
-  font-weight: var(--rd-font-medium);
-}
-
-.rd-nav-link-active { /* text-white bg-blue-600 shadow-md */
-  color: var(--rd-color-text-white);
-  background-color: var(--rd-color-primary);
-  box-shadow: var(--rd-shadow-md);
-}
-.rd-nav-link-active .rd-nav-icon { /* material-icons text-white */
-  color: var(--rd-color-text-white);
-}
-.rd-nav-link-active:hover { /* Keep active styles on hover */
-    background-color: var(--rd-color-primary);
-}
-
-
-.rd-sidebar-footer { /* mt-auto */
-  margin-top: auto;
-}
-
-/* Main Content Styles */
-.rd-main-content { /* flex-1 p-8 overflow-y-auto */
+.rd-main-content {
   flex: 1;
-  padding: var(--rd-spacing-8);
-  overflow-y: auto;
-  background-color: var(--rd-color-main-bg); /* Ensure main area has its own bg if different from page */
+  padding: 1.5rem;
+  background-color: #ffffff;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px 0 rgba(0,0,0,0.1), 0 1px 2px 0 rgba(0,0,0,0.06);
 }
 
-.rd-main-header { /* mb-10 */
-  margin-bottom: var(--rd-spacing-10);
+.rd-page-title {
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 1.5rem;
 }
 
-.rd-main-title-text { /* text-4xl font-bold text-slate-800 tracking-tight */
-  font-size: var(--rd-text-4xl);
-  font-weight: var(--rd-font-bold);
-  color: var(--rd-color-text-primary);
-  letter-spacing: -0.025em; /* tracking-tight */
+.rd-content-section {
+  margin-bottom: 2rem;
 }
 
-.rd-content-section { /* mb-10 */
-  margin-bottom: var(--rd-spacing-10);
-}
-.rd-content-section:last-child {
-    margin-bottom: 0;
-}
-
-.rd-section-title { /* text-2xl font-semibold text-slate-700 mb-6 */
-  font-size: var(--rd-text-2xl);
-  font-weight: var(--rd-font-semibold);
-  color: var(--rd-color-text-secondary);
-  margin-bottom: var(--rd-spacing-6);
+.rd-section-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #334155;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #e2e8f0;
 }
 
-/* Table Styles */
-.rd-table-container { /* overflow-x-auto bg-white rounded-xl shadow-lg border border-slate-200 */
+.rd-table-container {
   overflow-x: auto;
-  background-color: var(--rd-color-card-bg);
-  border-radius: var(--rd-rounded-xl);
-  box-shadow: var(--rd-shadow-lg);
-  border: 1px solid var(--rd-color-border);
+  border: 1px solid #e2e8f0;
+  border-radius: 0.375rem;
 }
 
-.rd-table { /* w-full text-left */
+.rd-table {
   width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.rd-table-thead {
+  background-color: #f8fafc;
+}
+
+.rd-th, .rd-td {
+  padding: 0.75rem 1rem;
   text-align: left;
-  border-collapse: collapse; /* Added for better border handling */
+  border-bottom: 1px solid #e2e8f0;
+  white-space: nowrap;
 }
 
-.rd-table-thead { /* border-b border-slate-200 bg-slate-50 */
-  border-bottom: 1px solid var(--rd-color-border);
-  background-color: var(--rd-color-bg); /* bg-slate-50 for header */
+.rd-th {
+  font-weight: 500;
+  color: #475569;
 }
 
-.rd-th { /* p-4 text-sm font-semibold text-slate-600 */
-  padding: var(--rd-spacing-4);
-  font-size: var(--rd-text-sm);
-  font-weight: var(--rd-font-semibold);
-  color: var(--rd-color-text-muted);
-  /* text-transform: uppercase; /* Often used for table headers but not in design */
-}
-.rd-th-actions { /* text-right */
-  text-align: right;
+.rd-td {
+  color: #334155;
 }
 
-.rd-table-tbody { /* divide-y divide-slate-200 */
-  /* Using border on tr instead of divide-y for simplicity */
-}
-
-.rd-tr { /* hover:bg-slate-50 transition-colors */
-  border-bottom: 1px solid var(--rd-color-border);
-  transition: background-color 0.15s ease-in-out;
-}
-.rd-tr:last-child {
+.rd-tr:last-child .rd-td {
   border-bottom: none;
 }
-.rd-tr:hover {
-  background-color: var(--rd-color-nav-hover-bg); /* hover:bg-slate-50 */
+
+.rd-td-project-name, .rd-td-source-name {
+  font-weight: 500;
+  color: #1e293b;
 }
 
-.rd-td { /* p-4 text-sm */
-  padding: var(--rd-spacing-4);
-  font-size: var(--rd-text-sm);
-  color: var(--rd-color-text-muted); /* Default for most table text (e.g. date, summary) */
-  vertical-align: middle; /* For better alignment with badges/buttons */
-}
-.rd-td-project-name, .rd-td-source-name { /* text-slate-700 font-medium */
-  color: var(--rd-color-text-secondary);
-  font-weight: var(--rd-font-medium);
+.rd-status-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border-radius: 9999px;
+  text-transform: capitalize;
 }
 
-.rd-status-badge { /* inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold */
-  display: inline-flex;
-  align-items: center;
-  padding: var(--rd-spacing-1) var(--rd-spacing-3); /* py-1 px-3 */
-  border-radius: var(--rd-rounded-full);
-  font-size: var(--rd-text-xs);
-  font-weight: var(--rd-font-semibold);
-}
-.rd-status-yellow { /* bg-yellow-100 text-yellow-700 */
-  background-color: var(--rd-color-status-yellow-bg);
-  color: var(--rd-color-status-yellow-text);
-}
-.rd-status-green { /* bg-green-100 text-green-700 */
-  background-color: var(--rd-color-status-green-bg);
-  color: var(--rd-color-status-green-text);
+.rd-status-yellow {
+  background-color: #fef9c3;
+  color: #a16207;
 }
 
-.rd-td-actions { /* text-right */
+.rd-status-green {
+  background-color: #dcfce7;
+  color: #166534;
+}
+
+.rd-td-date {
+  color: #64748b;
+}
+
+.rd-td-actions {
   text-align: right;
 }
-.rd-action-button { /* text-blue-600 hover:text-blue-800 font-medium py-1 px-3 rounded-md hover:bg-blue-100 transition-colors */
-  color: var(--rd-color-primary-text-button);
-  font-weight: var(--rd-font-medium);
-  padding: var(--rd-spacing-1) var(--rd-spacing-3); /* py-1 px-3 */
-  border-radius: var(--rd-rounded-md);
-  background-color: transparent;
+
+.rd-action-button {
+  background-color: #3b82f6;
+  color: white;
+  padding: 0.375rem 0.75rem;
   border: none;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
   cursor: pointer;
-  transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out;
-}
-.rd-action-button:hover {
-  background-color: var(--rd-color-primary-light-bg-button-hover);
-  color: var(--rd-color-primary-hover-bg); /* hover:text-blue-800 (darker blue for text) */
+  transition: background-color 0.2s;
 }
 
-/* Ensure Material Icons are vertically aligned if necessary */
-.material-icons.rd-nav-icon {
-  vertical-align: middle; /* Or adjust as needed */
-  margin-right: var(--rd-spacing-1); /* Small gap if not covered by parent's gap */
+.rd-action-button:hover {
+  background-color: #2563eb;
 }
+
+/* Remove .rd-nav-icon if it's no longer used, or ensure it's styled if kept for other purposes */
+/* .rd-nav-icon {
+  margin-right: 0.75rem;
+} */
