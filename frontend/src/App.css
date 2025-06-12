@@ -1,7 +1,11 @@
 .App {
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 }
 
+/*
 .App-logo {
   height: 40vmin;
   pointer-events: none;
@@ -35,4 +39,29 @@
   to {
     transform: rotate(360deg);
   }
+}
+*/
+
+/* New styles for main content area to account for sticky header */
+.main-content-area {
+  flex: 1; /* Allow this area to grow and fill available space */
+  padding-top: 0; /* Header height will be handled by its own sticky positioning */
+  /* The header has padding: 1rem 2.5rem and border.
+     Its height is roughly 4.5rem (1rem padding-top + 1rem padding-bottom + 2.5rem content (svg+text) + border).
+     Let's assume a fixed header height for simplicity or use JS to calculate if it's dynamic.
+     Given the header is sticky and has its own background, content should just flow underneath it.
+     No specific padding-top is strictly needed here unless there are issues with content starting too high
+     behind the transparent parts of a non-opaque sticky header.
+     The current header is opaque white, so content will correctly start at the top of this container
+     and the header will overlay it.
+  */
+  display: flex; /* if child routes need to fill height */
+  flex-direction: column; /* if child routes need to fill height */
+}
+
+/* Ensure that individual page components can take up full height if needed */
+.main-content-area > div, .main-content-area > main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }

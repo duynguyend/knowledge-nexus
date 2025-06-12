@@ -1,0 +1,104 @@
+/* Styles for the Header component */
+.kn-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  white-space: nowrap;
+  border-bottom: 1px solid #e2e8f0; /* slate-200 */
+  padding: 1rem 2.5rem; /* py-4 px-10 */
+  background-color: white;
+  position: sticky; /* Make header sticky */
+  top: 0; /* Stick to the top */
+  z-index: 50; /* Ensure header is above other content */
+}
+
+.kn-header-logo-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem; /* gap-3 */
+  color: #0f172a; /* slate-900 */
+}
+
+.kn-logo-svg {
+  width: 1.75rem; /* size-7 */
+  height: 1.75rem; /* size-7 */
+  color: #2563eb; /* blue-600 */
+}
+
+.kn-header-title-text {
+  color: #0f172a; /* slate-900 */
+  font-size: 1.25rem; /* text-xl */
+  font-weight: 700; /* font-bold */
+  line-height: 1.375rem; /* leading-tight */
+  letter-spacing: -0.015em;
+}
+
+.kn-header-nav-actions {
+  display: flex;
+  flex: 1;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 1.5rem; /* gap-6 */
+}
+
+.kn-nav {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem; /* gap-6 */
+}
+
+.kn-nav-link {
+  color: #334155; /* slate-700 */
+  text-decoration: none; /* Remove default underline from Link */
+  font-size: 0.875rem; /* text-sm */
+  font-weight: 500; /* font-medium */
+  line-height: 1.25rem; /* leading-normal */
+  transition: color 0.2s;
+}
+
+.kn-nav-link:hover {
+  color: #2563eb; /* hover:text-blue-600 */
+}
+
+.kn-icon-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px; /* rounded-full */
+  height: 2.5rem; /* h-10 */
+  width: 2.5rem; /* w-10 */
+  background-color: transparent;
+  border: none;
+  color: #475569; /* slate-600 */
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.kn-icon-button:hover {
+  background-color: #f1f5f9; /* hover:bg-slate-100 */
+}
+
+.kn-icon-button .material-symbols-outlined {
+  font-size: 1.5rem; /* text-2xl */
+}
+
+.kn-profile-pic {
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  border-radius: 9999px; /* rounded-full */
+  width: 2.5rem; /* size-10 */
+  height: 2.5rem; /* size-10 */
+  border: 1px solid #e2e8f0; /* border-slate-200 */
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); /* shadow-sm */
+}
+
+/* Ensure material symbols are available */
+/* This should ideally be in a global CSS file or index.html */
+.material-symbols-outlined {
+  font-variation-settings:
+  'FILL' 0,
+  'wght' 400,
+  'GRAD' 0,
+  'opsz' 24;
+}
