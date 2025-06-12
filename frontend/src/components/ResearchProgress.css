@@ -1,80 +1,315 @@
-.research-progress-container {
-  background-color: #f9f9f9;
-  padding: 1.5rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-  margin-top: 1.5rem;
-  max-width: 800px; /* Or your preferred max-width */
+/* Global Styles & Variables (inspired by Tailwind's defaults) */
+:root {
+  --color-slate-50: #f8fafc;
+  --color-slate-100: #f1f5f9;
+  --color-slate-200: #e2e8f0;
+  --color-slate-600: #475569;
+  --color-slate-700: #334155;
+  --color-slate-800: #1e293b;
+  --color-slate-900: #0f172a;
+  --color-blue-600: #2563eb;
+  --color-white: #ffffff;
+
+  --font-sans: 'Inter', "Noto Sans", sans-serif;
+  --spacing-1: 0.25rem;
+  --spacing-2: 0.5rem;
+  --spacing-3: 0.75rem;
+  --spacing-4: 1rem;
+  --spacing-6: 1.5rem;
+  --spacing-8: 2rem;
+  --spacing-10: 2.5rem;
+}
+
+body { /* Apply base font to body if not already done in index.css */
+  font-family: var(--font-sans);
+  color: var(--color-slate-900);
+  background-color: var(--color-slate-50);
+  margin: 0; /* Reset default margin */
+}
+
+.research-ai-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: var(--color-slate-50);
+}
+
+/* Header Styles */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-4) var(--spacing-10);
+  background-color: var(--color-white);
+  border-bottom: 1px solid var(--color-slate-200);
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); /* Tailwind's shadow-sm */
+  white-space: nowrap;
+}
+
+.header-logo {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  color: var(--color-slate-900);
+}
+
+.logo-svg {
+  width: 1.5rem; /* size-6 */
+  height: 1.5rem; /* size-6 */
+  color: var(--color-blue-600);
+}
+
+.header-title {
+  font-size: 1.25rem; /* text-xl */
+  font-weight: 600; /* font-semibold */
+  letter-spacing: -0.025em; /* tracking-tight */
+  margin: 0;
+}
+
+.header-nav {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-6); /* gap-6 */
+}
+
+.nav-link {
+  font-size: 0.875rem; /* text-sm */
+  font-weight: 500; /* font-medium */
+  color: var(--color-slate-700);
+  text-decoration: none;
+  transition: color 0.15s ease-in-out;
+}
+
+.nav-link:hover {
+  color: var(--color-blue-600);
+}
+
+.nav-link.active { /* For the current page link */
+  color: var(--color-blue-600);
+}
+
+/* Main Content Styles */
+.main-content {
+  flex: 1;
+  padding: var(--spacing-8) var(--spacing-10); /* px-10 py-8 */
+}
+
+.content-wrapper { /* Simulates mx-auto max-w-5xl */
+  max-width: 64rem; /* max-w-5xl is 64rem or 1024px */
   margin-left: auto;
   margin-right: auto;
 }
 
-.research-progress-container h2 {
-  text-align: center;
-  color: #333;
-  margin-top: 0;
-  margin-bottom: 1.5rem;
-  font-size: 1.8rem;
+.main-title {
+  font-size: 1.875rem; /* text-3xl */
+  font-weight: 700; /* font-bold */
+  letter-spacing: -0.025em; /* tracking-tight */
+  color: var(--color-slate-900);
+  margin-bottom: var(--spacing-8);
 }
 
-.research-progress-container p {
-  color: #555;
-  line-height: 1.6;
-  margin-bottom: 0.5rem;
+/* Stats Grid */
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr; /* default for mobile */
+  gap: var(--spacing-6);
+  margin-bottom: var(--spacing-8);
 }
 
-.research-progress-container .status-running { color: #007bff; font-weight: bold; }
-.research-progress-container .status-awaiting_human_verification { color: #ffc107; font-weight: bold; }
-.research-progress-container .status-completed { color: #28a745; font-weight: bold; }
-.research-progress-container .status-failed { color: #dc3545; font-weight: bold; }
-.research-progress-container .status-error_in_workflow { color: #dc3545; font-weight: bold; }
-.research-progress-container .status-resuming_after_verification { color: #17a2b8; font-weight: bold; }
-.research-progress-container .status-queued { color: #6c757d; font-weight: bold; }
+@media (min-width: 768px) { /* md:grid-cols-3 */
+  .stats-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
 
+.stat-card { /* Corresponds to the div inside the grid */
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+  border-radius: 0.5rem; /* rounded-lg */
+  border: 1px solid var(--color-slate-200);
+  background-color: var(--color-white);
+  padding: var(--spacing-6);
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); /* shadow-sm */
+}
 
-.progress-bar-container {
+.stat-label {
+  font-size: 0.875rem; /* text-sm */
+  font-weight: 500; /* font-medium */
+  color: var(--color-slate-600);
+  margin: 0;
+}
+
+.stat-value {
+  font-size: 1.875rem; /* text-3xl */
+  font-weight: 700; /* font-bold */
+  color: var(--color-slate-900);
+  margin: 0;
+}
+
+.stat-value-highlight { /* For the blue "75%" */
+  font-size: 1.875rem; /* text-3xl */
+  font-weight: 700; /* font-bold */
+  color: var(--color-blue-600);
+  margin: 0;
+}
+
+/* Progress Section */
+.progress-section { /* This is a .card, so it gets card styles */
+  margin-bottom: var(--spacing-8);
+  /* .card styles are defined below */
+}
+
+.progress-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-2);
+}
+
+.progress-title {
+  font-size: 1rem; /* text-base */
+  font-weight: 600; /* font-semibold */
+  color: var(--color-slate-800);
+  margin: 0;
+}
+
+.progress-percentage {
+  font-size: 0.875rem; /* text-sm */
+  font-weight: 500; /* font-medium */
+  color: var(--color-blue-600);
+  margin: 0;
+}
+
+.progress-bar-wrapper { /* Replaces .progress-bar-container */
+  height: 0.75rem; /* h-3 */
   width: 100%;
-  background-color: #e9ecef;
-  border-radius: .25rem;
-  margin: 0.8rem 0;
-  overflow: hidden; /* Ensures the inner bar respects the border radius */
+  border-radius: 9999px; /* rounded-full */
+  background-color: var(--color-slate-200);
+  overflow: hidden;
 }
 
-.progress-bar {
-  height: 20px;
-  background-color: #007bff;
-  color: white;
-  text-align: center;
-  line-height: 20px; /* Vertically center text */
-  border-radius: .25rem 0 0 .25rem; /* Keep left radius, right will be cut by container */
+.progress-bar-fill { /* Replaces .progress-bar */
+  height: 0.75rem; /* h-3 */
+  border-radius: 9999px; /* rounded-full */
+  background-color: var(--color-blue-600);
   transition: width 0.3s ease-in-out;
-  font-size: 0.8rem;
 }
 
-.human-verification-section {
-  margin-top: 2rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid #e0e0e0;
+/* Task Details Section */
+.task-details-section { /* This is a .card */
+  margin-bottom: var(--spacing-8);
+}
+.task-details-section h3 { /* Specific title for this card */
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-slate-800);
+  margin-bottom: var(--spacing-4);
+}
+.task-details-section p {
+  color: var(--color-slate-700); /* Standardized paragraph color */
+  line-height: 1.6; /* Close to leading-relaxed */
+  margin-bottom: var(--spacing-2); /* Standardized margin, was 0.5rem */
 }
 
-.human-verification-section h3 {
-  color: #d9534f; /* A distinct color for attention */
-  text-align: center;
-  margin-bottom: 1rem;
+/* Status Indicator Styles (Existing, but ensure they work with new structure) */
+.task-details-section .status-running { color: #007bff; font-weight: bold; }
+.task-details-section .status-awaiting_human_verification { color: #ffc107; font-weight: bold; }
+.task-details-section .status-completed { color: #28a745; font-weight: bold; }
+.task-details-section .status-failed { color: #dc3545; font-weight: bold; }
+.task-details-section .status-error_in_workflow { color: #dc3545; font-weight: bold; }
+.task-details-section .status-resuming_after_verification { color: #17a2b8; font-weight: bold; }
+.task-details-section .status-queued { color: #6c757d; font-weight: bold; }
+
+
+/* Completion Message Block (inside .task-details-section) */
+.completion-message-block {
+  background-color: var(--color-slate-50); /* Light background to stand out a bit */
+  padding: var(--spacing-4);
+  border-radius: 0.375rem; /* rounded-md */
+  margin-top: var(--spacing-4);
 }
+.completion-message-block h4 {
+  font-size: 1.125rem; /* text-lg */
+  font-weight: 600;
+  color: var(--color-slate-800);
+  margin-top: 0;
+  margin-bottom: var(--spacing-2);
+}
+.completion-message-block p {
+  margin-bottom: var(--spacing-3);
+}
+.view-results-button { /* Existing style, ensure it's good */
+  background-color: var(--color-blue-600);
+  color: white;
+  padding: var(--spacing-2) var(--spacing-4);
+  border: none;
+  border-radius: 0.375rem; /* rounded-md */
+  cursor: pointer;
+  font-size: 0.875rem; /* text-sm */
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+.view-results-button:hover {
+  background-color: #1d4ed8; /* darker blue */
+}
+.view-results-button:disabled {
+  background-color: var(--color-slate-200);
+  cursor: not-allowed;
+}
+
+
+/* Data Summary Section */
+.data-summary-section { /* This is a .card */
+  /* .card styles defined below */
+}
+
+.section-title { /* Used in Data Summary h2 and Verification h3 */
+  font-size: 1.25rem; /* text-xl */
+  font-weight: 600; /* font-semibold */
+  color: var(--color-slate-900);
+  margin-bottom: var(--spacing-4);
+  margin-top: 0; /* Reset for h3s inside cards */
+}
+
+.summary-text {
+  font-size: 0.875rem; /* text-sm */
+  color: var(--color-slate-700);
+  line-height: 1.625; /* leading-relaxed */
+  margin: 0;
+}
+
+
+/* Human Verification Section (already styled, but now a .card) */
+.human-verification-section { /* This is a .card */
+  margin-top: var(--spacing-8); /* Increased top margin */
+  /* .card styles defined below. Previous border-top is handled by card. */
+}
+/* .human-verification-section .section-title is used for its h3 */
 
 .verification-item, .conflicting-sources, .verification-form {
-  background-color: #fff;
-  padding: 1rem;
-  border-radius: 6px;
-  border: 1px solid #ddd;
-  margin-bottom: 1rem;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  /* These are now children of .human-verification-section card.
+     Remove individual card-like styling (bg, border, shadow) if parent .card provides it.
+     Adjust padding/margin as needed. */
+  background-color: transparent; /* Let parent card bg show */
+  border: none; /* Remove individual borders if parent card has one */
+  box-shadow: none; /* Remove individual shadow */
+  padding: 0; /* Reset padding, rely on parent or add specific */
+  margin-bottom: var(--spacing-6); /* Space between items in the verification card */
 }
+.verification-item:last-child,
+.conflicting-sources:last-child,
+.verification-form:last-child {
+  margin-bottom: 0;
+}
+
 
 .verification-item h4, .conflicting-sources h4, .verification-form h4 {
   margin-top: 0;
-  color: #007bff;
+  color: var(--color-blue-600); /* Existing blue color */
+  font-size: 1rem; /* text-base */
+  font-weight: 600; /* font-semibold */
+  margin-bottom: var(--spacing-3);
 }
 
 .conflicting-sources ul {
@@ -83,51 +318,60 @@
 }
 
 .conflicting-sources li {
-  padding: 0.5rem;
-  border-bottom: 1px solid #eee;
+  padding: var(--spacing-2);
+  border-bottom: 1px solid var(--color-slate-100); /* Lighter border */
 }
 .conflicting-sources li:last-child {
   border-bottom: none;
 }
+.conflicting-sources p { margin-bottom: var(--spacing-1); }
+
 
 .verification-form .form-group {
-  margin-bottom: 1rem;
+  margin-bottom: var(--spacing-4);
 }
 
 .verification-form label {
   display: block;
-  margin-bottom: .5rem;
-  color: #333;
-  font-weight: bold;
+  margin-bottom: var(--spacing-2);
+  color: var(--color-slate-700); /* Slightly softer than pure black */
+  font-weight: 500; /* font-medium */
 }
 .verification-form .radio-label {
-  font-weight: normal;
-  margin-right: 1rem;
-  display: inline-flex; /* Align radio button and text */
+  font-weight: normal; /* Keep as is */
+  margin-right: var(--spacing-4);
+  display: inline-flex;
   align-items: center;
 }
 .verification-form .radio-label input[type="radio"] {
-  margin-right: 0.3rem;
+  margin-right: var(--spacing-1);
 }
-
 
 .verification-form textarea {
-  width: calc(100% - 20px); /* Full width minus padding */
-  padding: 0.5rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 0.95rem;
+  width: 100%; /* Simpler width */
+  padding: var(--spacing-2) var(--spacing-3);
+  border: 1px solid var(--color-slate-200); /* Softer border */
+  border-radius: 0.375rem; /* rounded-md */
+  font-size: 0.875rem; /* text-sm */
   min-height: 60px;
+  box-sizing: border-box; /* Important for width 100% and padding */
+}
+.verification-form textarea:focus {
+  outline: none;
+  border-color: var(--color-blue-600);
+  box-shadow: 0 0 0 1px var(--color-blue-600);
 }
 
-.submit-verification-button {
-  background-color: #28a745;
+
+.submit-verification-button { /* Existing style, check consistency */
+  background-color: #28a745; /* Existing green */
   color: white;
-  padding: 0.6rem 1.2rem;
+  padding: var(--spacing-2) var(--spacing-4);
   border: none;
-  border-radius: 4px;
+  border-radius: 0.375rem; /* rounded-md */
   cursor: pointer;
-  font-size: 1rem;
+  font-size: 0.875rem; /* text-sm */
+  font-weight: 500;
   transition: background-color 0.2s ease;
 }
 
@@ -136,25 +380,30 @@
 }
 
 .submit-verification-button:disabled {
-  background-color: #ccc;
+  background-color: var(--color-slate-200);
   cursor: not-allowed;
 }
 
-.error-message.general-error-display { /* More specific selector for general errors */
+/* General Error Display (Existing, check consistency) */
+.error-message.general-error-display {
   background-color: #fff3cd;
   color: #856404;
   border: 1px solid #ffeeba;
-  padding: 0.75rem 1.25rem;
-  border-radius: 0.25rem;
-  margin-top: 1rem;
-  width: auto; /* Adjust as needed, or remove for block display */
+  padding: var(--spacing-3) var(--spacing-4);
+  border-radius: 0.375rem; /* rounded-md */
+  margin-top: var(--spacing-4);
 }
 
-.card { /* Reusable card style */
-    background-color: #fff;
-    padding: 1.5rem;
-    border-radius: 6px;
-    border: 1px solid #e0e0e0;
-    margin-bottom: 1rem;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+/* Reusable Card Style (from HTML design) */
+.card {
+  background-color: var(--color-white);
+  padding: var(--spacing-6); /* p-6 */
+  border-radius: 0.5rem; /* rounded-lg */
+  border: 1px solid var(--color-slate-200);
+  margin-bottom: var(--spacing-8); /* mb-8, though some cards have specific mb */
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); /* shadow-sm */
 }
+/* Remove old .research-progress-container and its h2, p styles if not needed */
+/* .research-progress-container { ... } */
+/* .research-progress-container h2 { ... } */
+/* .research-progress-container p { ... } */

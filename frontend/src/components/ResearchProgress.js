@@ -177,116 +177,176 @@ function ResearchProgress({ taskId }) {
   } = statusDetails;
 
   return (
-    <div className="research-progress-container">
-      <h2>Research Progress</h2>
-      <p><strong>Task ID:</strong> {statusDetails.task_id}</p>
-      <p><strong>Status:</strong> <span className={`status-${status}`}>{status || 'N/A'}</span> {isPollingLoading && status !== 'completed' && status !== 'failed' && status !== 'awaiting_human_verification' ? "(Updating...)" : ""}</p>
-
-      {/* Message display: Show specific completion message if status is completed, otherwise regular message */}
-      {status === 'completed' && (
-        <div className="completion-message-block card">
-          <h3>Research Complete</h3>
-          <p>{message || "The research task has been successfully completed."}</p>
-          <button
-            onClick={() => navigate(`/results/${statusDetails.task_id}`)}
-            disabled={isLoading || status !== 'completed'}
-            className="view-results-button"
-          >
-            View Results
-          </button>
+    <div className="research-ai-container"> {/* Changed from research-progress-container to a more generic one if this is the main app container */}
+      <header className="header">
+        <div className="header-logo">
+          {/* SVG Icon can be componentized or inlined if small */}
+          <svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" className="logo-svg">
+            <path d="M42.4379 44C42.4379 44 36.0744 33.9038 41.1692 24C46.8624 12.9336 42.2078 4 42.2078 4L7.01134 4C7.01134 4 11.6577 12.932 5.96912 23.9969C0.876273 33.9029 7.27094 44 7.27094 44L42.4379 44Z" fill="currentColor"></path>
+          </svg>
+          <h2 className="header-title">ResearchAI</h2>
         </div>
-      )}
-      {/* Show regular message only if not completed, to avoid redundancy with the block above */}
-      {status !== 'completed' && message && <p><strong>Message:</strong> {message}</p>}
+        <nav className="header-nav">
+          <a href="#" className="nav-link">Home</a>
+          <a href="#" className="nav-link active">New Research</a>
+          <a href="#" className="nav-link">My Library</a>
+          <a href="#" className="nav-link">Settings</a>
+        </nav>
+        {/* User profile and notifications can be added here later if needed */}
+      </header>
 
-      {typeof progress === 'number' && status !== 'completed' && ( // Hide progress bar on completion
-        <div className="progress-bar-container">
-          <div className="progress-bar" style={{ width: `${Math.max(0, Math.min(progress,1)) * 100}%` }}>
-            {(Math.max(0, Math.min(progress,1)) * 100).toFixed(0)}%
+      <main className="main-content">
+        <div className="content-wrapper"> {/* Simulates mx-auto max-w-5xl */}
+          <h1 className="main-title">Research Progress Overview</h1>
+
+          {/* Static Grid Section */}
+          <div className="stats-grid">
+            <div className="stat-card">
+              <p className="stat-label">Sources Explored</p>
+              <p className="stat-value">15</p>
+            </div>
+            <div className="stat-card">
+              <p className="stat-label">Data Collected</p>
+              <p className="stat-value">250</p>
+            </div>
+            <div className="stat-card">
+              <p className="stat-label">Current Progress</p>
+              <p className="stat-value-highlight">75%</p> {/* Example, can be dynamic */}
+            </div>
           </div>
-        </div>
-      )}
-      {/* Display general error if it occurred during an action or if initial load failed but we have some old data */}
-      {error && <div className="error-message general-error-display"><p>Notice: {error}</p></div>}
 
-      {/* Completed State Specific UI */}
-      {/* This part is now handled by the completion-message-block above */}
+          {/* Overall Progress Bar Section - Dynamic based on 'progress' */}
+          <div className="progress-section card">
+            <div className="progress-header">
+              <p className="progress-title">Overall Progress</p>
+              <p className="progress-percentage">
+                {/* Dynamically update this from statusDetails.progress */}
+                {statusDetails && typeof progress === 'number' ? `${(Math.max(0, Math.min(progress, 1)) * 100).toFixed(0)}% Complete` : 'N/A'}
+              </p>
+            </div>
+            <div className="progress-bar-wrapper">
+              <div
+                className="progress-bar-fill"
+                style={{ width: statusDetails && typeof progress === 'number' ? `${Math.max(0, Math.min(progress, 1)) * 100}%` : '0%' }}
+              ></div>
+            </div>
+          </div>
 
-      {status === 'awaiting_human_verification' && verification_request && (
-        <div className="human-verification-section">
-          <h3>Human Verification Needed</h3>
-          <div className="verification-item card">
-            <h4>Item to Verify (ID: {verification_request.data_id})</h4>
-            <p><strong>Content Preview:</strong> {verification_request.data_to_verify.content_preview}</p>
-            {verification_request.data_to_verify.url && (
-              <p><strong>URL:</strong> <a href={verification_request.data_to_verify.url} target="_blank" rel="noopener noreferrer">{verification_request.data_to_verify.url}</a></p>
+          {/* Task Specific Details - Integrating existing dynamic content */}
+          <div className="task-details-section card">
+            <h3>Task Details</h3>
+            <p><strong>Task ID:</strong> {statusDetails.task_id}</p>
+            <p><strong>Status:</strong> <span className={`status-${status}`}>{status || 'N/A'}</span> {isPollingLoading && status !== 'completed' && status !== 'failed' && status !== 'awaiting_human_verification' ? "(Updating...)" : ""}</p>
+
+            {/* Message display: Show specific completion message if status is completed, otherwise regular message */}
+            {status === 'completed' && (
+              <div className="completion-message-block"> {/* Removed card class, parent is a card */}
+                <h4>Research Complete</h4>
+                <p>{message || "The research task has been successfully completed."}</p>
+                <button
+                  onClick={() => navigate(`/results/${statusDetails.task_id}`)}
+                  disabled={isLoading || status !== 'completed'}
+                  className="view-results-button"
+                >
+                  View Results
+                </button>
+              </div>
             )}
+            {status !== 'completed' && message && <p><strong>Message:</strong> {message}</p>}
+
+            {/* Display general error if it occurred */}
+            {error && <div className="error-message general-error-display"><p>Notice: {error}</p></div>}
           </div>
 
-          {verification_request.conflicting_sources && verification_request.conflicting_sources.length > 0 && (
-            <div className="conflicting-sources card">
-              <h4>Conflicting Sources:</h4>
-              <ul>
-                {verification_request.conflicting_sources.map(source => (
-                  <li key={source.id}>
-                    <p><strong>ID:</strong> {source.id}</p>
-                    <p><strong>Preview:</strong> {source.content_preview}</p>
-                    {source.url && <p><strong>URL:</strong> <a href={source.url} target="_blank" rel="noopener noreferrer">{source.url}</a></p>}
-                  </li>
-                ))}
-              </ul>
+
+          {/* Data Summary Section - Static for now */}
+          <div className="data-summary-section card">
+            <h2 className="section-title">Data Summary</h2>
+            <p className="summary-text">
+              The research team has explored 15 sources, collecting 250 data points. The overall progress is at 75%, with data synthesis and verification underway. Key findings
+              include a strong correlation between AI advancements and productivity gains in various sectors, particularly in healthcare and finance. Further analysis is required
+              to refine these insights and identify potential limitations or biases in the data.
+            </p>
+          </div>
+
+          {/* Human Verification Section - Existing dynamic content */}
+          {status === 'awaiting_human_verification' && verification_request && (
+            <div className="human-verification-section card"> {/* Added card class for consistency */}
+              <h3 className="section-title">Human Verification Needed</h3>
+              <div className="verification-item"> {/* Removed card class, parent is a card */}
+                <h4>Item to Verify (ID: {verification_request.data_id})</h4>
+                <p><strong>Content Preview:</strong> {verification_request.data_to_verify.content_preview}</p>
+                {verification_request.data_to_verify.url && (
+                  <p><strong>URL:</strong> <a href={verification_request.data_to_verify.url} target="_blank" rel="noopener noreferrer">{verification_request.data_to_verify.url}</a></p>
+                )}
+              </div>
+
+              {verification_request.conflicting_sources && verification_request.conflicting_sources.length > 0 && (
+                <div className="conflicting-sources"> {/* Removed card class */}
+                  <h4>Conflicting Sources:</h4>
+                  <ul>
+                    {verification_request.conflicting_sources.map(source => (
+                      <li key={source.id}>
+                        <p><strong>ID:</strong> {source.id}</p>
+                        <p><strong>Preview:</strong> {source.content_preview}</p>
+                        {source.url && <p><strong>URL:</strong> <a href={source.url} target="_blank" rel="noopener noreferrer">{source.url}</a></p>}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              <form onSubmit={handleSubmitVerification} className="verification-form"> {/* Removed card class */}
+                <h4>Submit Your Feedback</h4>
+                <div className="form-group approval-radios">
+                  <label className="radio-label">
+                    <input
+                      type="radio"
+                      name="approved"
+                      value="true"
+                      checked={humanApproval.approved === true}
+                      onChange={handleApprovalInputChange}
+                    /> Approve
+                  </label>
+                  <label className="radio-label">
+                    <input
+                      type="radio"
+                      name="approved"
+                      value="false"
+                      checked={humanApproval.approved === false}
+                      onChange={handleApprovalInputChange}
+                    /> Reject
+                  </label>
+                </div>
+                <div className="form-group">
+                  <label htmlFor="notes">Notes:</label>
+                  <textarea
+                    id="notes"
+                    name="notes"
+                    value={humanApproval.notes}
+                    onChange={handleApprovalInputChange}
+                    rows="3"
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="corrected_content">Corrected Content (Optional):</label>
+                  <textarea
+                    id="corrected_content"
+                    name="corrected_content"
+                    value={humanApproval.corrected_content}
+                    onChange={handleApprovalInputChange}
+                    rows="5"
+                    placeholder="If rejecting or needs modification, provide corrected content here..."
+                  />
+                </div>
+                <button type="submit" disabled={isLoading} className="submit-verification-button">
+                  {isLoading ? 'Submitting...' : 'Submit Verification'}
+                </button>
+              </form>
             </div>
           )}
-
-          <form onSubmit={handleSubmitVerification} className="verification-form card">
-            <h4>Submit Your Feedback</h4>
-            <div className="form-group approval-radios">
-              <label className="radio-label">
-                <input
-                  type="radio"
-                  name="approved"
-                  value="true" // String value for radio
-                  checked={humanApproval.approved === true}
-                  onChange={handleApprovalInputChange}
-                /> Approve
-              </label>
-              <label className="radio-label">
-                <input
-                  type="radio"
-                  name="approved"
-                  value="false" // String value for radio
-                  checked={humanApproval.approved === false}
-                  onChange={handleApprovalInputChange}
-                /> Reject
-              </label>
-            </div>
-            <div className="form-group">
-              <label htmlFor="notes">Notes:</label>
-              <textarea
-                id="notes"
-                name="notes"
-                value={humanApproval.notes}
-                onChange={handleApprovalInputChange}
-                rows="3"
-              />
-            </div>
-            <div className="form-group">
-              <label htmlFor="corrected_content">Corrected Content (Optional):</label>
-              <textarea
-                id="corrected_content"
-                name="corrected_content"
-                value={humanApproval.corrected_content}
-                onChange={handleApprovalInputChange}
-                rows="5"
-                placeholder="If rejecting or needs modification, provide corrected content here..."
-              />
-            </div>
-            <button type="submit" disabled={isLoading} className="submit-verification-button">
-              {isLoading ? 'Submitting...' : 'Submit Verification'}
-            </button>
-          </form>
         </div>
-      )}
+      </main>
     </div>
   );
 }
