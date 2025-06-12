@@ -448,53 +448,63 @@ def build_knowledge_nexus_workflow(chroma_service: Optional[ChromaService] = Non
     # Placeholder strings to check against
     azure_placeholders = ["YOUR_AZURE_OPENAI_API_KEY", "YOUR_AZURE_OPENAI_ENDPOINT", "YOUR_AZURE_OPENAI_DEPLOYMENT_NAME"]
     openai_placeholder = "YOUR_OPENAI_API_KEY" # General placeholder for any OpenAI key
+    common_openai_placeholder = "YOUR_ACTUAL_OPENAI_API_KEY_REPLACE_ME" # Specific common placeholder
 
-    # 1. Attempt Azure OpenAI Initialization
-    azure_config_complete = (
-        azure_api_key_val and azure_api_key_val not in azure_placeholders and
-        azure_endpoint_val and azure_endpoint_val not in azure_placeholders and
-        openai_api_version_val and # Assuming OPENAI_API_VERSION is less likely to be a "YOUR_" placeholder
-        azure_deployment_name_val and azure_deployment_name_val not in azure_placeholders
-    )
+    # Determine if Azure environment variables are present
+    azure_vars_present = azure_api_key_val is not None and azure_endpoint_val is not None
 
-    if azure_config_complete:
-        print("Attempting to initialize AzureChatOpenAI LLM...")
-        try:
-            llm_instance = AzureChatOpenAI(
-                azure_endpoint=azure_endpoint_val,
-                api_key=azure_api_key_val,
-                api_version=openai_api_version_val,
-                azure_deployment=azure_deployment_name_val,
-                temperature=0.2,
-            )
-            print("AzureChatOpenAI LLM initialized successfully.")
-            llm_initialized_boolean = True
-        except Exception as e:
-            print(f"Error initializing AzureChatOpenAI: {e}. Attempting fallback.")
-            llm_instance = None # Ensure it's None on Azure failure before fallback
+    if azure_vars_present:
+        print("Azure environment variables detected. Attempting Azure OpenAI exclusively.")
+        # Check if the configuration is complete and not placeholders
+        azure_config_complete = (
+            azure_api_key_val and azure_api_key_val not in azure_placeholders and
+            azure_endpoint_val and azure_endpoint_val not in azure_placeholders and
+            openai_api_version_val and # Assuming OPENAI_API_VERSION is less likely to be a "YOUR_" placeholder
+            azure_deployment_name_val and azure_deployment_name_val not in azure_placeholders
+        )
+
+        if azure_config_complete:
+            print("Azure configuration is complete. Attempting to initialize AzureChatOpenAI LLM...")
+            try:
+                llm_instance = AzureChatOpenAI(
+                    azure_endpoint=azure_endpoint_val,
+                    api_key=azure_api_key_val,
+                    api_version=openai_api_version_val,
+                    azure_deployment=azure_deployment_name_val,
+                    temperature=0.2,
+                )
+                print("AzureChatOpenAI LLM initialized successfully.")
+                llm_initialized_boolean = True
+            except Exception as e:
+                print(f"Error initializing AzureChatOpenAI: {e}. LLM will be None. Standard OpenAI fallback will NOT be attempted as Azure variables were present.")
+                llm_instance = None # Ensure it's None on Azure failure
+        else:
+            print("Azure OpenAI environment variables are present but incomplete or contain placeholders. LLM will be None. Standard OpenAI fallback will NOT be attempted.")
+            llm_instance = None # Ensure it's None due to incomplete Azure config
     else:
-        print("Azure OpenAI environment variables are missing, incomplete, or contain placeholders. Skipping Azure LLM and attempting fallback.")
-
-    # 2. Fallback to Standard OpenAI Initialization
-    if not llm_instance: # If Azure was skipped or failed
-        print("Attempting to initialize standard ChatOpenAI LLM as fallback...")
-        if openai_api_key_val and openai_api_key_val != openai_placeholder and openai_api_key_val != "YOUR_ACTUAL_OPENAI_API_KEY_REPLACE_ME": # Added specific common placeholder
+        print("Azure environment variables not detected. Attempting standard OpenAI.")
+        if openai_api_key_val and openai_api_key_val != openai_placeholder and openai_api_key_val != common_openai_placeholder:
+            print("Attempting to initialize standard ChatOpenAI LLM...")
             try:
                 llm_instance = ChatOpenAI(api_key=openai_api_key_val, model_name="gpt-3.5-turbo", temperature=0.2)
-                print("ChatOpenAI LLM initialized successfully as a fallback.")
+                print("ChatOpenAI LLM initialized successfully.")
                 llm_initialized_boolean = True
             except Exception as e_std:
-                print(f"Error initializing standard ChatOpenAI as fallback: {e_std}. LLM will be None.")
+                print(f"Error initializing standard ChatOpenAI: {e_std}. LLM will be None.")
                 llm_instance = None # Ensure it's None on standard OpenAI failure
         else:
-            print("Standard OPENAI_API_KEY not found or is a placeholder. No LLM will be initialized via standard OpenAI.")
-            # llm_instance is already None or remains None
+            print("Standard OPENAI_API_KEY not found or is a placeholder. No LLM will be initialized.")
+            llm_instance = None # Ensure it's None
 
-    # 3. Final Logging
-    if not llm_instance:
-        print("CRITICAL WARNING: No LLM was initialized. Both Azure OpenAI and standard OpenAI configurations were missing, incomplete, or failed. The system will use simulated data for synthesis and document generation. Please check your backend/.env file.")
+    # Final Logging based on whether an LLM instance was successfully created
+    if llm_instance:
+        print(f"LLM initialization successful ({type(llm_instance).__name__}).")
+        llm_initialized_boolean = True
+    else:
+        print("CRITICAL WARNING: No LLM was initialized. Check Azure/OpenAI configurations and previous error messages. The system will use simulated data for synthesis and document generation. Please review your backend/.env file.")
+        llm_initialized_boolean = False # Explicitly set to false
 
-    llm_initialized_boolean = llm_instance is not None # Final confirmation
+    # llm_initialized_boolean = llm_instance is not None # This is now set within the blocks
 
     synthesize_node_with_llm = functools.partial(synthesize_node, llm=llm_instance)
     document_generation_node_with_llm = functools.partial(document_generation_node, llm=llm_instance)
