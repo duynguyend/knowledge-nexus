@@ -25,6 +25,7 @@ function App() {
           <Route path="/community" element={<div>Community Page Placeholder</div>} />
         </Routes>
       </div>
+    </div>
     </Router>
   );
 }
