@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import ReactMarkdown from 'react-markdown';
 import { getTaskStatus, submitVerification } from '../api';
 import './ResearchProgress.css';
 
@@ -275,7 +276,8 @@ function ResearchProgress({ taskId }) {
               <h3 className="section-title">Human Verification Needed</h3>
               <div className="verification-item"> {/* Removed card class, parent is a card */}
                 <h4>Item to Verify (ID: {verification_request.data_id})</h4>
-                <p><strong>Content Preview:</strong> {verification_request.data_to_verify.content_preview}</p>
+                  <p><strong>Content Preview:</strong></p>
+                  <ReactMarkdown>{verification_request.data_to_verify.content_preview}</ReactMarkdown>
                 {verification_request.data_to_verify.url && (
                   <p><strong>URL:</strong> <a href={verification_request.data_to_verify.url} target="_blank" rel="noopener noreferrer">{verification_request.data_to_verify.url}</a></p>
                 )}
@@ -288,7 +290,8 @@ function ResearchProgress({ taskId }) {
                     {verification_request.conflicting_sources.map(source => (
                       <li key={source.id}>
                         <p><strong>ID:</strong> {source.id}</p>
-                        <p><strong>Preview:</strong> {source.content_preview}</p>
+                        <p><strong>Preview:</strong></p>
+                        <ReactMarkdown>{source.content_preview}</ReactMarkdown>
                         {source.url && <p><strong>URL:</strong> <a href={source.url} target="_blank" rel="noopener noreferrer">{source.url}</a></p>}
                       </li>
                     ))}
