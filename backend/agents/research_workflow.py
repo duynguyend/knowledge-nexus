@@ -69,6 +69,8 @@ class KnowledgeNexusState(TypedDict): # type: ignore
     messages: List[BaseMessage]  # For conversation history with LLMs
     error_message: Optional[str]
     human_feedback: Optional[HumanApproval] = None # Added for HITL
+    sources_explored: int # Added for progress tracking
+    data_collected: int # Added for progress tracking
 
 
 # 2. Implement Agent Nodes
@@ -76,6 +78,10 @@ class KnowledgeNexusState(TypedDict): # type: ignore
 def research_node(state: KnowledgeNexusState, chroma_service: ChromaService) -> KnowledgeNexusState:
     print(f"--- Entering RESEARCH_NODE --- Task ID: {state.get('task_id')}, Current Stage: {state.get('current_stage')}")
     state['current_stage'] = "researching"
+    # Initialize or carry over progress counters
+    sources_explored_count = state.get('sources_explored', 0)
+    data_collected_count = state.get('data_collected', 0)
+
     print(f"\n--- Agent: Researcher (Stage: {state['current_stage']}) ---")
     topic = state.get('topic')
     task_id = state.get('task_id') # Get task_id for ChromaDB collection name
@@ -83,12 +89,15 @@ def research_node(state: KnowledgeNexusState, chroma_service: ChromaService) -> 
     if not topic or not task_id:
         print("Error: Topic or Task ID is missing in state for research_node.")
         state['error_message'] = "Topic or Task ID is missing, cannot conduct research."
-        state['research_data'] = []
+        state['research_data'] = state.get('research_data', []) # Ensure it exists
+        state['sources_explored'] = sources_explored_count
+        state['data_collected'] = len(state['research_data'])
         return state
 
     print(f"Initiating internet research for topic: {topic} (Task ID: {task_id}) using Google Search")
     state['error_message'] = None # Clear previous errors
     processed_results = [] # Initialize processed_results
+    current_search_sources = 0
 
     # Check for Google API Key and CSE ID
     if not GOOGLE_API_KEY or GOOGLE_API_KEY == "YOUR_GOOGLE_API_KEY" or \
@@ -101,6 +110,7 @@ def research_node(state: KnowledgeNexusState, chroma_service: ChromaService) -> 
             {"id": f"sim_gs_{uuid.uuid4()}", "url": f"http://example.com/simulated_gs_source2_for_{topic.replace(' ','_')}", "title": f"Simulated Google: Details on {topic}", "snippet": f"Further simulated Google Search details regarding {topic}.", "raw_content": f"Further simulated raw content for {topic} from Google Search.", "score": 0.75, "source_name": "Google Search Simulator"}
         ]
         processed_results.extend(simulated_data)
+        current_search_sources = len(simulated_data)
         # Ensure 'research_data' is initialized if it's None
         if state.get('research_data') is None:
             state['research_data'] = []
@@ -118,6 +128,7 @@ def research_node(state: KnowledgeNexusState, chroma_service: ChromaService) -> 
             result = service.cse().list(q=topic, cx=GOOGLE_CSE_ID, num=20).execute()
 
             google_search_items = result.get("items", [])
+            current_search_sources = len(google_search_items) # Count unique sources from this search
             print(f"Google Search returned {len(google_search_items)} items.")
 
             for item in google_search_items:
@@ -141,7 +152,9 @@ def research_node(state: KnowledgeNexusState, chroma_service: ChromaService) -> 
 
     # Update state with results (either simulated or real or empty if error)
     state['research_data'] = (state.get('research_data') or []) + processed_results
-    print(f"Researcher: Total research data now contains {len(state['research_data'])} items after Google Search attempt.")
+    state['sources_explored'] = sources_explored_count + current_search_sources
+    state['data_collected'] = len(state['research_data'])
+    print(f"Researcher: Total research data now contains {state['data_collected']} items. Total sources explored in this task: {state['sources_explored']}.")
 
     # Store results (simulated or real) in ChromaDB
     if processed_results and chroma_service:
@@ -583,7 +596,9 @@ if __name__ == '__main__':
         "messages": [],
         "error_message": None,
         "human_feedback": None, # Initialize new state field
-        "current_stage": "queued" # Initialize current_stage
+        "current_stage": "queued", # Initialize current_stage
+        "sources_explored": 0, # Initialize new field
+        "data_collected": 0 # Initialize new field
     }
 
     # To test the human input path, you would need to:

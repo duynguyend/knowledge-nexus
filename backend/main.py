@@ -320,11 +320,16 @@ async def get_task_status_endpoint(task_id: str):
         message = error_message_from_task or f"Research failed for topic: {topic}."
     # else, the generic message `Task for topic '{topic}' is currently {effective_stage_for_status}.` will be used.
 
+    sources_explored = current_graph_state.get("sources_explored", 0)
+    data_collected = current_graph_state.get("data_collected", 0)
+
     return ResearchStatus(
         task_id=task_id,
         status=effective_stage_for_status, # Use the granular stage here
         message=message,
         progress=current_progress,
+        sources_explored=sources_explored,
+        data_collected=data_collected,
         timestamp=datetime.utcnow(),
         verification_request=verification_req_data
     )
