@@ -31,7 +31,9 @@ describe('ResearchProgress Component', () => {
       task_id: mockTaskId,
       status: 'running',
       message: 'Processing your request.',
-      progress: 0.5,
+      progress: 0.5, // For 50% progress
+      sources_explored: 10,
+      data_collected: 100,
       verification_request: null,
     });
     submitVerification.mockResolvedValue({ message: 'Verification submitted successfully.' });
@@ -50,7 +52,7 @@ describe('ResearchProgress Component', () => {
     // ... (other links)
   });
 
-  test('renders static stats display', async () => {
+  test('renders dynamic stats display', async () => {
     render(
       <Router>
         <ResearchProgress taskId={mockTaskId} />
@@ -59,11 +61,14 @@ describe('ResearchProgress Component', () => {
     await waitFor(() => expect(getTaskStatus).toHaveBeenCalled());
 
     expect(screen.getByText('Sources Explored')).toBeInTheDocument();
-    expect(screen.getByText('15')).toBeInTheDocument();
-    // ... (other stats)
+    expect(screen.getByText('10')).toBeInTheDocument(); // Updated for dynamic data
+    expect(screen.getByText('Data Collected')).toBeInTheDocument();
+    expect(screen.getByText('100')).toBeInTheDocument(); // Updated for dynamic data
+    expect(screen.getByText('Current Progress')).toBeInTheDocument();
+    expect(screen.getByText('50%')).toBeInTheDocument(); // Updated for dynamic progress
   });
 
-  test('renders static data summary section', async () => {
+  test('renders dynamic data summary section', async () => {
     render(
       <Router>
         <ResearchProgress taskId={mockTaskId} />
@@ -72,7 +77,8 @@ describe('ResearchProgress Component', () => {
     await waitFor(() => expect(getTaskStatus).toHaveBeenCalled());
 
     expect(screen.getByText('Data Summary')).toBeInTheDocument();
-    expect(screen.getByText(/The research team has explored 15 sources/)).toBeInTheDocument();
+    // Check for parts of the dynamic summary string
+    expect(screen.getByText(/The research team has explored 10 sources, collecting 100 data points. The overall progress is at 50%,/)).toBeInTheDocument();
   });
 
   test('renders dynamic data: task ID, status, message', async () => {
@@ -81,6 +87,8 @@ describe('ResearchProgress Component', () => {
       status: 'testing_status',
       message: 'This is a test message.',
       progress: 0.25,
+      sources_explored: 5, // Different values for this specific test
+      data_collected: 50,
       verification_request: null,
     });
 
@@ -94,6 +102,16 @@ describe('ResearchProgress Component', () => {
     expect(screen.getByText(mockTaskId)).toBeInTheDocument();
     expect(screen.getByText('testing_status')).toBeInTheDocument();
     expect(screen.getByText('This is a test message.')).toBeInTheDocument();
+    // Also check that the specific stats for this test render if they differ from beforeEach
+    expect(screen.getByText('Sources Explored')).toBeInTheDocument();
+    expect(screen.getByText('5')).toBeInTheDocument();
+    expect(screen.getByText('Data Collected')).toBeInTheDocument();
+    expect(screen.getByText('50')).toBeInTheDocument();
+    // And the progress for this specific test case
+    expect(screen.getByText('Current Progress')).toBeInTheDocument();
+    expect(screen.getByText('25%')).toBeInTheDocument(); // from progress: 0.25
+     // And the summary for this specific test case
+    expect(screen.getByText(/The research team has explored 5 sources, collecting 50 data points. The overall progress is at 25%,/)).toBeInTheDocument();
   });
 
   test('renders progress bar when status is running and progress data is available', async () => {
@@ -101,7 +119,9 @@ describe('ResearchProgress Component', () => {
       task_id: mockTaskId,
       status: 'running',
       message: 'Processing...',
-      progress: 0.66,
+      progress: 0.66, // 66%
+      sources_explored: 20, // Example values
+      data_collected: 200,
       verification_request: null,
     });
     render(

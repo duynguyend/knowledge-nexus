@@ -174,8 +174,10 @@ function ResearchProgress({ taskId }) {
     status,
     message,
     progress,
-    verification_request
-  } = statusDetails;
+    verification_request,
+    sources_explored = 0, // Default to 0 if undefined
+    data_collected = 0   // Default to 0 if undefined
+  } = statusDetails || {}; // Ensure statusDetails itself is not null
 
   return (
     <div className="research-ai-container"> {/* Changed from research-progress-container to a more generic one if this is the main app container */}
@@ -204,15 +206,17 @@ function ResearchProgress({ taskId }) {
           <div className="stats-grid">
             <div className="stat-card">
               <p className="stat-label">Sources Explored</p>
-              <p className="stat-value">15</p>
+              <p className="stat-value">{sources_explored}</p>
             </div>
             <div className="stat-card">
               <p className="stat-label">Data Collected</p>
-              <p className="stat-value">250</p>
+              <p className="stat-value">{data_collected}</p>
             </div>
             <div className="stat-card">
               <p className="stat-label">Current Progress</p>
-              <p className="stat-value-highlight">75%</p> {/* Example, can be dynamic */}
+              <p className="stat-value-highlight">
+                {statusDetails && typeof statusDetails.progress === 'number' ? `${(Math.max(0, Math.min(statusDetails.progress, 1)) * 100).toFixed(0)}%` : 'N/A'}
+              </p>
             </div>
           </div>
 
@@ -264,9 +268,7 @@ function ResearchProgress({ taskId }) {
           <div className="data-summary-section card">
             <h2 className="section-title">Data Summary</h2>
             <p className="summary-text">
-              The research team has explored 15 sources, collecting 250 data points. The overall progress is at 75%, with data synthesis and verification underway. Key findings
-              include a strong correlation between AI advancements and productivity gains in various sectors, particularly in healthcare and finance. Further analysis is required
-              to refine these insights and identify potential limitations or biases in the data.
+              {`The research team has explored ${sources_explored || 'N/A'} sources, collecting ${data_collected || 'N/A'} data points. The overall progress is at ${statusDetails && typeof statusDetails.progress === 'number' ? `${(Math.max(0, Math.min(statusDetails.progress, 1)) * 100).toFixed(0)}%` : 'N/A'}, with data synthesis and verification underway. Key findings include a strong correlation between AI advancements and productivity gains in various sectors, particularly in healthcare and finance. Further analysis is required to refine these insights and identify potential limitations or biases in the data.`}
             </p>
           </div>
 

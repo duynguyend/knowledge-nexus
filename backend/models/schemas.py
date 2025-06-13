@@ -13,6 +13,8 @@ class ResearchStatus(BaseModel):
     status: str  # e.g., "pending", "in_progress", "completed", "failed", "needs_human_input"
     message: Optional[str] = None
     progress: Optional[float] = None  # e.g., 0.5 for 50%
+    sources_explored: Optional[int] = None
+    data_collected: Optional[int] = None
     timestamp: datetime = Field(default_factory=datetime.utcnow)
     verification_request: Optional['DataVerificationRequest'] = None # Added for HITL
 
