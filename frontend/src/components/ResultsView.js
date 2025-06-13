@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import ReactMarkdown from 'react-markdown';
 import { getTaskResults } from '../api';
 import './ResultsView.css';
 
@@ -36,7 +37,7 @@ const ResultsView = () => {
           <h1>Research Results</h1>
           {/* Optional: Display topic if available */}
           {/* <p><strong>Topic:</strong> {results.topic || taskId}</p> */}
-          <article className="results-content" dangerouslySetInnerHTML={{ __html: results.document_content }} />
+          <ReactMarkdown className="results-content">{results.document_content}</ReactMarkdown>
         </>
       )}
     </div>
